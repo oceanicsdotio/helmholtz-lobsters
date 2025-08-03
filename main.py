@@ -2,8 +2,10 @@
 Load, transform, and do basic analysis on a lobster
 movement trials dataset.
 """
-from pandas import read_csv, DataFrame, to_datetime
+from pandas import read_csv, DataFrame, to_datetime, cut
 from numpy import vectorize, atan2, pi, arange
+import matplotlib.pyplot as plt
+import numpy as np
 
 def load_trials_data(file_path: str) -> DataFrame:
     """
@@ -85,12 +87,6 @@ def load_single_trial(file_path: str) -> DataFrame:
     df[d1] = df["heading"].diff()
     df[d1] = df[d1].where(df[d1] > -180, df[d1] + 360)
     df[d1] = df[d1].where(df[d1] < 180, df[d1] - 360)
-
-    d2 = "heading_second_derivative"
-    df[d2] = df[d1].diff()
-    df[d2] = df[d2].where(df[d2] > -180, df[d2] + 360)
-    df[d2] = df[d2].where(df[d2] < 180, df[d2] - 360)
-
     return df
 
 def join_elapsed_time_since_event(trial_data: DataFrame, trial: int, events: DataFrame) -> DataFrame:
@@ -118,6 +114,24 @@ def load_control_data(file_path: str) -> DataFrame:
     df.set_index("trial", inplace=True)
     return df
 
+def plot_control_position(df: DataFrame) -> None:
+    N = 12
+    position = df["sector"].value_counts(normalize=True)
+    radians = position.index / 360 * 2 * np.pi
+    width = 2 * np.pi / N
+    ax = plt.subplot(projection='polar')
+    ax.bar(radians, position.values, width=width, bottom=0.0, color="gray")
+    plt.savefig("figures/control_position_polar_plot.png")
+
+def plot_control_heading(df: DataFrame) -> None:
+    N = 12
+    heading = df["heading"].value_counts(normalize=True)
+    radians = heading.index / 360 * 2 * np.pi
+    width = 2 * np.pi / N
+    ax = plt.subplot(projection='polar')
+    ax.bar(radians, heading.values, width=width, bottom=0.0, color="gray")
+    plt.savefig("figures/control_heading_polar_plot.png")
+
 if __name__ == "__main__":
     # trials = load_trials_data("data/trials.csv")
     # print(trials.dtypes)
@@ -134,13 +148,15 @@ if __name__ == "__main__":
     # joined = join_intervals_and_events(intervals, events)
     # print(joined.dtypes)
     # print(joined.head())
-
-    # example_trial = load_single_trial("data/trial-16.csv")
-    # join_elapsed_time_since_event(example_trial, 16, events)
-    # print(example_trial.dtypes)
-    # print(example_trial.head())
+    # for trial in [16, 17]:
+    #     example_trial = load_single_trial(f"data/trials/{trial}.csv")
+    #     # join_elapsed_time_since_event(example_trial, 16, events)
+    #     print(example_trial.dtypes)
+    #     print(example_trial.head())
 
     control = load_control_data("data/control.csv")
     print(control.dtypes)
     print(control.head())
+    plot_control_heading(control)
+    plot_control_position(control)
 
