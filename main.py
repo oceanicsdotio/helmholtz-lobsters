@@ -107,6 +107,16 @@ def join_elapsed_time_since_event(trial_data: DataFrame, trial: int, events: Dat
         trial_data["coil_on"][loc:rows] = row.field
         trial_data["since_event"][loc:rows] = arange(rows - loc)
 
+def load_control_data(file_path: str) -> DataFrame:
+    """
+    Load the control data for lobster movement trials from a CSV file.
+    """
+    df: DataFrame = read_csv(file_path)
+    time = "elapsed_time"
+    convert = vectorize(clock_string_to_seconds)
+    df[time] = convert(df[time])
+    df.set_index("trial", inplace=True)
+    return df
 
 if __name__ == "__main__":
     # trials = load_trials_data("data/trials.csv")
@@ -117,7 +127,7 @@ if __name__ == "__main__":
     # print(intervals.dtypes)
     # print(intervals.head())
 
-    events = load_events_data("data/events.csv")
+    # events = load_events_data("data/events.csv")
     # print(events.dtypes)
     # print(events.head())
 
@@ -125,8 +135,12 @@ if __name__ == "__main__":
     # print(joined.dtypes)
     # print(joined.head())
 
-    example_trial = load_single_trial("data/trial-16.csv")
-    join_elapsed_time_since_event(example_trial, 16, events)
-    print(example_trial.dtypes)
-    print(example_trial.head())
+    # example_trial = load_single_trial("data/trial-16.csv")
+    # join_elapsed_time_since_event(example_trial, 16, events)
+    # print(example_trial.dtypes)
+    # print(example_trial.head())
+
+    control = load_control_data("data/control.csv")
+    print(control.dtypes)
+    print(control.head())
 

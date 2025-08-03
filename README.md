@@ -16,55 +16,39 @@ Lohmann et al. (1995) covered the eyestalks of adult *P argus* in magnetic exper
 
 ### Arena
 
-The arena was a circular basin (28 cm ø). The bottom was covered with a uniform layer of mixed fine and coarse sand. The tank was centered in the coils at 75 cm height. Water was replaced between trials (depth = 5 cm) and sediment allowed to settle. A transparent plastic cover was divided into 30° sectors, with north marked, and a hole for securing the tether. A tripod-mounted DV camera filmed downward through the cover. The PVC frame for the coils was draped with black plastic sheet to prevent glare in the recording, and to reduce shadows that might bias unblinded trials. 
+The arena was a circular basin (28 cm ø). The bottom was covered with a uniform layer of mixed fine and coarse sand. The tank was centered in the coils at 75 cm height. Water was replaced between trials (depth = 5 cm) and sediment allowed to settle. A transparent plastic cover was divided into 30° sectors, with north marked, and a hole for securing the tether. A tripod-mounted DV camera filmed downward through the cover. The PVC frame for the coils was draped with black plastic sheet to prevent glare in the recording, and to reduce shadows that might bias behavioral trials. 
 
-### Electromagnetic field
+### Helmholtz coil
 
-Lohmann et al (1995) studied navigation by *P. argus*, using two square electromagnetic coils to create overlapping electromagnetic fields with a central area of magnetic uniformity. For these experiments, I created similar coils by winding 22 turns of 16-gauge insulated copper wire around a PVC frame with side length $S$=150 cm, and a coil separation of 82 cm, to achieve \<0.5% deviation within a 50 cm area; large enough to contain the trial arena (Firester 1966). The effect of rounded instead of square corners was ignored (pipe diameter = 5 cm).
+Lohmann et al (1995) studied navigation by *P. argus*, using two square electromagnetic coils to create overlapping electromagnetic fields with a central area of magnetic uniformity. For these experiments, I created similar coils by winding 22 turns of 16-gauge insulated copper wire around a PVC frame with side length $S$=150 cm, and a coil separation of 82 cm, to achieve \<0.5% deviation across the area of the trial arena (Firester 1966). The effect of rounded instead of square corners was ignored (pipe diameter = 5 cm).
 
 The horizontal geomagnetic component for Boston has a magnitude of 0.198 G (National Geophysical Data Center), but *in situ* magnetometer readings were 0.238-0.245 G, with deviation in some areas of the lab as high as 40°. To account for this, the coils were aligned using a compass in an area with minimal interference, such that apparent north varied 5° between sides. A field strength of $B$=0.478 G was chosen as a target.
 
 Firester's equation for the central field strength of a Helmholtz coil ($B$, gauss) was used with Ohm’s law to calculate the voltage ($V$) necessary to reverse the magnetic field, $B=6.218 V S^{-2} R^{-1}$. Coil resistances ($R$) of 1.85 and 2.05 Ω (including power supply leads) were measured using a Fluke 8050A multimeter. Based on the side length and resistance, 3.41 and 3.50 V was supplied to the coils, producing $B$=0.415 G. This fell short of the target field strength.
 
-
 ### Trials
 
-| Trial | Type | Acclimation (min) | Tether |
-| --- | --- | --- | --- |
-| 1 | i | 12 | False |
-| 2 | i | 10 | False |
-| 3-11 | i | 5 | False |
-| 12 | ii | 5 | False |
-| 13 | iii(a) | 5 | False |
+In baseline trials (Type 1, N=11, Trials 1-11) each lobster was corralled (4 cm ø) during a 5-12 minute acclimation, then freely wandered for 20 minutes. Video was converted to an image sequence with one minute intervals, starting when the corral was removed. Lobsters tended to reach the wall of the tank and follow it, reversing direction at random. Most settled in the relative safety of depressions in the sand substrate against the tank wall. Based on this, I used tethers in further trials.
 
-In baseline trials (I, N=10) lobsters were corralled (4 cm ø) during a 5 minute acclimation, then freely wandered for 20 minutes. Video was converted to an image sequence with one minute intervals, starting when the corral was removed. 
+For the initial EMF trials, two lobsters were recorded every 60 seconds while tethered and blindfolded for a 10-20 minute acclimation period, during which the Helmholtz coils were not activated (Type 2A, N=2, 12 & 14). Then each specimen was left in the arena for an additional 20 minute trial in which the electromagnetic field was reversed once at 10 minutes (Type 2B, N=2, 13 & 15).
 
-EMF control trials (II, N=2) were conducted with blindfolds and tethers. There was no acclimation period. Runtime and photo interval were again 20 min and 60 s.
-
-For two trials the coil was activated at 10 min remained on for 10 min (IIIa, N=2).
-
-Two further trials had coil state toggled every 2 min (IIIb, N=2).
-
-One trial had coil state toggled preferentially while the lobster was traversing the arena, every 15–60 seconds (IIIc, N=1).
-
-Size trials (IIIu, N=6)
-
-A reorientation event was defined as a 90° change in heading, not caused by interaction with the arena or tether. These corresponded to EMF reversal event if it occurred within 5 seconds. Continuous circling within a quadrant was evaluated as an event for every revolution. Events occurring within 60 seconds following any disturbance were ignored. Plots of vector averages were used to evaluate directional preference (Lohmann 1995). The number of distinct reorientation events (total and corresponding to reversals) was compared to runtime (considered in 5 second bins). 
+Two further trials had coil state toggled every 2 minutes (Type 3, N=2, 16 & 17). Many of the reversals had to be eliminated due to interaction with the tether, so in further trials switching was done opportunistically every 15–60 seconds as lobsters were crossing the middle of the arena (Type 4, N=7).
 
 ## Results
 
-Baseline trials (I) did not show obvious directional preference (Figure 2). Lobsters tended to reach the wall of the tank and follow it, reversing direction occasionally and at random. Most settled in the relative safety of depressions against the tank wall. This necessitated the use of a tether in control trials. Control trials (II) showed erratic movement (Figure 3), but no settling. 
+A reorientation event was defined as a 90° change in heading, not within the 60 seconds following an interaction with the arena or tether. Continuous circling was evaluated as an event for every revolution.
 
-Lobsters reaching the end of a tether would either (a) strain against it, (b) turn tangential to the radius and walk at the limit of the string, or (c) be lifted off the substrate by tension. Entanglement occurred in only one case, though in several cases the tether fouled on itself. This did not affect mobility, only the radius of movement. Slack was added in cases where the small radius caused constant directional change. If the lobster reached the wall, the tether was shortened, the next time it was not under tension.
+Baseline trials (Type 1) did not show obvious directional preference.
 
-In two trials (IIIa) a reversed horizontal field  caused an instantaneous heading change (100%, N=2). One lobster was at the limit of the tether in the southern arena, heading east. It turned inward and completed a narrow loop before again reaching the end of the tether an resuming its counterclockwise course. The second was straining against the tether and moving clockwise in the northern arena; it also turned in and passed through the center of the arena, and reaching the opposite wall began a counterclockwise course. These behaviors were observed in (II). 
+Figure: average heading during baseline trials (Type 1) (N=6). Direction is vector average of 20 positions, length is an indicator of  course consistency. Following the tank wall results in a short vector.
 
-A series of reversals (IIIb) showed discernible reactions in some cases (44%, N=18), but the circular course  imposed by the tether made it difficult to establish the cause of directional changes. This increased to 72% if including reactions that may have been related but were not the defined >90° turn. Of 27 non-random reversals (IIIc) performed over 11.75 min, 9 were ignored because the lobster was at the extent of the tether (including positive, negative and possible reactions). An obvious change in behavior occurred in 12 cases (67%, N=18). With a more lenient criteria for a related event there potentially would be 89% coincidence. There were 47 total reorientation events, occurring in 33% of 5 s time intervals. 
+Control trials (Type 2A) showed erratic movement, but no settling. Lobsters reaching the end of a tether would either (a) strain against it, (b) turn tangential to the radius and walk at the limit of the string, or (c) be lifted off the substrate by tension. Entanglement occurred in only one case, though in several cases the tether fouled on itself. This did not affect mobility, only the radius of movement. Slack was added in cases where the small radius caused constant directional change. If the lobster reached the wall, the tether was shortened the next time it was not under tension.
 
-Figure 2: average heading during baseline trials (I) (N=6). Direction is vector average of 20 positions, length is an indicator of  course consistency. Following the tank wall results in a short vector.
+Figure: Sector positions of two lobsters during blind tether trials with no reversals (Type 2A). This shows a possible bias to 270° (West), but seems coincidental when examining video instead of still images.
 
-Figure 3: Sector positions of two lobsters during blind tether trials with no reversals (II). This shows a possible bias to 270° (West), but seems coincidental when examining video instead of still images.
+In Type 2B a field reversal caused an instantaneous heading change (100%, N=2). One lobster was at the limit of the tether in the southern arena, heading east. It turned inward and completed a narrow loop before again reaching the end of the tether an resuming its counterclockwise course. The second was straining against the tether and moving clockwise in the northern arena; it also turned in and passed through the center of the arena, and reaching the opposite wall began a counterclockwise course.
 
+A series of reversals (Type 3) showed discernible reactions in some cases (44%, N=18), but the tether made it difficult to establish the cause of directional changes. This increased to 72% if including reactions that may have been related but were not the defined >90° turn. Of 27 non-random reversals (Type 4) performed over 11.75 min, 9 were ignored because the lobster was at the extent of the tether (including positive, negative and possible reactions). An obvious change in behavior occurred in 12 cases (67%, N=18). With a more lenient criteria for a related event there potentially would be 89% coincidence. There were 47 total reorientation events, occurring in 33% of 5 s time intervals.
 
 
 ## Discussion
