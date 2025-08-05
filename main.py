@@ -2,9 +2,10 @@
 Load, transform, and do basic analysis on a lobster
 movement trials dataset.
 """
-from pandas import read_csv, DataFrame, to_datetime, cut
+from pandas import read_csv, DataFrame, to_datetime, concat
 from numpy import vectorize, atan2, pi, arange
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 import numpy as np
 
 def load_trials_data(file_path: str) -> DataFrame:
@@ -33,7 +34,7 @@ def load_interval_data(file_path: str) -> DataFrame:
     convert = vectorize(clock_string_to_seconds)
     df[start] = convert(df[start])
     df[stop] = convert(df[stop])
-    df["elapsed"] = df[stop] - df[start]
+    df["duration"] = df[stop] - df[start]
     return df.set_index("trial")
 
 def load_events_data(file_path: str) -> DataFrame:
@@ -83,10 +84,10 @@ def load_single_trial(file_path: str) -> DataFrame:
     dx = df["x_head"] - df["x_tail"]
     dy = df["y_head"] - df["y_tail"]
     df["heading"] = atan2(dx, dy) * 180 / pi
-    d1 = "heading_first_derivative"
-    df[d1] = df["heading"].diff()
-    df[d1] = df[d1].where(df[d1] > -180, df[d1] + 360)
-    df[d1] = df[d1].where(df[d1] < 180, df[d1] - 360)
+    # d1 = "heading_first_derivative"
+    # df[d1] = df["heading"].diff()
+    # df[d1] = df[d1].where(df[d1] > -180, df[d1] + 360)
+    # df[d1] = df[d1].where(df[d1] < 180, df[d1] - 360)
     return df
 
 def join_elapsed_time_since_event(trial_data: DataFrame, trial: int, events: DataFrame) -> DataFrame:
@@ -132,31 +133,86 @@ def plot_control_heading(df: DataFrame) -> None:
     ax.bar(radians, heading.values, width=width, bottom=0.0, color="gray")
     plt.savefig("figures/control_heading_polar_plot.png")
 
+def calc_histogram(df, bins: int, ax: Axes, color: str, alpha: float, label: str) -> None:
+    area, edges = np.histogram(df+180, bins=bins, range=(0, 360), density=True)
+    radians = (edges[:-1] / 360 + (360 / bins / 2)) * 2 * np.pi
+    width = 2 * np.pi / bins * 0.5
+    ax.bar(radians, area, width=width, bottom=0.0, color="none", edgecolor=color, alpha=alpha, label=label)
+
+def plot_trial_position(
+    df: DataFrame,
+    bins: int = 12,
+    alpha: float = 0.75
+) -> None:
+    """
+    Plot the angular position distribution of a lobster trial. Split data
+    by whether the coil was on or off.
+    """
+    series = df["angular_position"]
+    mask = df["compass"] > 0
+    rows = df.shape[0]
+    on = series.loc[mask]
+    off = series.loc[~mask]
+    ax = plt.subplot(projection='polar')
+    calc_histogram(on, bins, ax, "red", alpha, "coil on")
+    calc_histogram(off, bins, ax, "blue", alpha, "coil off")
+    ax.grid(False)
+    ax.set_title(f"Angular position distribution (N={rows})")
+    ax.set_yticklabels([])
+    plt.legend(loc="best")
+    plt.savefig("figures/trial_position_polar_plot.png")
+    plt.close()
+
+def plot_trial_heading(
+    df: DataFrame,
+    bins: int = 12,
+    alpha: float = 0.75
+) -> None:
+    """
+    Plot the angular position distribution of a lobster trial. Split data
+    by whether the coil was on or off.
+    """
+    series = df["heading"]
+    mask = df["compass"] > 0
+    rows = df.shape[0]
+    on = series.loc[mask]
+    off = series.loc[~mask]
+    ax = plt.subplot(projection='polar')
+    calc_histogram(on, bins, ax, "red", alpha, "coil on")
+    calc_histogram(off, bins, ax, "blue", alpha, "coil off")
+    ax.grid(False)
+    ax.set_title(f"Heading distribution (N={rows})")
+    ax.set_yticklabels([])
+    plt.legend(loc="best")
+    plt.savefig("figures/trial_heading_polar_plot.png")
+    plt.close()
+
 if __name__ == "__main__":
     # trials = load_trials_data("data/trials.csv")
     # print(trials.dtypes)
     # print(trials.head())
 
+    # Data are already annotated with time since polarity switch,
+    # Can't join events and intervals because some time offset information
+    # was lost.
     # intervals = load_interval_data("data/intervals.csv")
+    # timing = intervals["duration"].groupby(["trial"]).sum()
+    # print(timing)
     # print(intervals.dtypes)
-    # print(intervals.head())
+    dfs = []
+    for trial_id in [16, 17, 18, 19, 20, 21, 22, 23, 24]:
+        trial = load_single_trial(f"data/trials/{trial_id}.csv")
+        trial["trial"] = trial_id
+        print(trial.dtypes)
+        print(trial.head())
+        dfs.append(trial)
+    all_trials = concat(dfs)
+    plot_trial_position(all_trials, bins=12)
+    plot_trial_heading(all_trials, bins=12)
 
-    # events = load_events_data("data/events.csv")
-    # print(events.dtypes)
-    # print(events.head())
-
-    # joined = join_intervals_and_events(intervals, events)
-    # print(joined.dtypes)
-    # print(joined.head())
-    # for trial in [16, 17]:
-    #     example_trial = load_single_trial(f"data/trials/{trial}.csv")
-    #     # join_elapsed_time_since_event(example_trial, 16, events)
-    #     print(example_trial.dtypes)
-    #     print(example_trial.head())
-
-    control = load_control_data("data/control.csv")
-    print(control.dtypes)
-    print(control.head())
-    plot_control_heading(control)
-    plot_control_position(control)
+    # control = load_control_data("data/control.csv")
+    # print(control.dtypes)
+    # print(control.head())
+    # plot_control_heading(control)
+    # plot_control_position(control)
 
