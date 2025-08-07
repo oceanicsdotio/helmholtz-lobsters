@@ -10,21 +10,24 @@ Larval American lobsters (*Homarus americanus*) live suspended in surface waters
 
 ### Specimens
 
-Ten juvenile *H. americanus* from the New England Aquarium were used in control trials, and a subset of those in experiments. Specimens were stage VI-VII (CL=8.8±0.5 mm), and molted before trials began. They were housed in individual mesh tubes in aerated 15 °C artificial seawater, with a 12:12 hr light schedule, and fed *Artemia* daily. 
+Recently molted stage VI-VII juveniles (CL=8.8±0.5 mm, N=10) from the New England Aquarium Lobster Research Facility were used in the experiment. These were kept in individual mesh tubes in aerated 15 °C artificial seawater, with a 12:12 hr light schedule, and fed *Artemia* daily. 
 
-Lohmann et al. (1995) covered the eyestalks of adult *P argus* in magnetic experiments to prevent orienting to the sun (Deutschlander et al 1999). In this study lobsters were blindfolded with black plastic, wrapped under the rostrum and eyes and secured to the carapace with cyanoacrylic adhesive. Blindfolded lobsters did not react to motion, and their ability to eat and walk was unaffected. A cotton thread was glued to the plastic to prevent contact with tank walls. Individuals made unsuccessful attempts to remove tethers immediately after affixing, but otherwise ignored them.
+Lobsters were blindfolded with black plastic, wrapped under the rostrum and eyes and secured to the carapace with cyanoacrylic adhesive. Covering the eyestalks prevents orienting to light without harming the animal (Lohmann et al. 1995, Deutschlander et al 1999). Lobsters did not react to motion, and their ability to eat and walk was unaffected.
 
-### Arena
-
-The arena was a circular basin (28 cm ø). The bottom was covered with a uniform layer of mixed fine and coarse sand. The tank was centered in the coils at 75 cm height. Water was replaced between trials (depth = 5 cm) and sediment allowed to settle. A transparent plastic cover was divided into 30° sectors, with north marked, and a hole for securing the tether. A tripod-mounted DV camera filmed downward through the cover. The PVC frame for the coils was draped with black plastic sheet to prevent glare in the recording, and to reduce shadows that might bias behavioral trials. 
+A cotton thread was glued to the plastic to prevent contact with tank walls. Individuals made unsuccessful attempts to remove tethers immediately after affixing, but otherwise ignored them.
 
 ### Helmholtz coil
 
-Lohmann et al (1995) studied navigation by *P. argus*, using two square electromagnetic coils to create overlapping electromagnetic fields with a central area of magnetic uniformity. For these experiments, I created similar coils by winding 22 turns of 16-gauge insulated copper wire around a PVC frame with side length $S$=150 cm, and a coil separation of 82 cm, to achieve \<0.5% deviation across the area of the trial arena (Firester 1966). The effect of rounded instead of square corners was ignored (pipe diameter = 5 cm).
+Two square electromagnetic coils created overlapping electromagnetic fields with a 50 cm area in middle with <0.5% difference in strength (Lohmann et al 1995, Firester 1966). Coils were made with 22 turns of 16-gauge insulated copper wire around 150 cm PVC frames 82 cm apart. I assumed round corners had no effect (diameter = 5 cm).
 
-The horizontal geomagnetic component for Boston has a magnitude of 0.198 G (National Geophysical Data Center), but *in situ* magnetometer readings were 0.238-0.245 G, with deviation in some areas of the lab as high as 40°. To account for this, the coils were aligned using a compass in an area with minimal interference, such that apparent north varied 5° between sides. A field strength of $B$=0.478 G was chosen as a target.
+Laboratory magnetometer readings of horizontal field strength were 0.238-0.245 G, with as much as 40° deviation in apparent north. To account for this, coils were located such that apparent north varied <5° between sides.
 
-Firester's equation for the central field strength of a Helmholtz coil ($B$, gauss) was used with Ohm’s law to calculate the voltage ($V$) necessary to reverse the magnetic field, $B=6.218 V S^{-2} R^{-1}$. Coil resistances ($R$) of 1.85 and 2.05 Ω (including power supply leads) were measured using a Fluke 8050A multimeter. Based on the side length and resistance, 3.41 and 3.50 V was supplied to the coils, producing $B$=0.415 G. This fell short of the target field strength.
+Field strength of $B$=0.478 Gauss was used with Ohm’s law to calculate the voltage ($V$) necessary to reverse the magnetic field, $B=6.218 V S^{-2} R^{-1}$ (Firester 1966). Coil resistances ($R$) of 1.85 and 2.05 Ω (including power supply leads) were measured using a Fluke 8050A multimeter. Based on the side length and resistance, 3.41 and 3.50 V was supplied to the coils, producing $B$=0.415 G. This fell short of the $B$=0.478 G needed.
+
+### Arena
+
+The arena was a circular plastic basin (28 cm ø). The bottom was covered with a uniform layer of mixed fine and coarse sand. The tank was centered in the coils at 75 cm height. Water was replaced between trials (depth = 5 cm) and sediment allowed to settle. A transparent plastic cover was divided into 30° sectors, with north marked, and a hole for securing the tether. A tripod-mounted DV camera filmed downward through the cover. The PVC frame for the coils was draped with black plastic sheet to prevent glare in the recording, and to reduce shadows that might bias behavioral trials. 
+
 
 ### Trials
 
