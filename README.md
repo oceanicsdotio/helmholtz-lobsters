@@ -44,20 +44,26 @@ A reorientation event was defined as a 90° change in heading, not within the 60
 
 ## Results
 
+### Baseline
+
 Baseline trials (Type 1) did not show obvious directional preference.
 
+![alt text](https://github.com/oceanicsdotio/helmholtz-lobsters/raw/main/figures/control_position_polar_plot.png "Position distribution in baseline trials")
+
+![alt text](https://github.com/oceanicsdotio/helmholtz-lobsters/raw/main/figures/control_heading_polar_plot.png "Heading distribution in baseline trials")
 
 
-Figure: average heading during baseline trials (Type 1) (N=6). Direction is vector average of 20 positions, length is an indicator of course consistency. Following the tank wall results in a short vector.
+### Treatment
 
-Type 2 trials showed erratic movement, but no settling. If the lobster reached the arena wall, the tether was shortened the next time it was not under tension. Lobsters reaching the end of a tether would either (a) strain against it, (b) walk at the limit of the string, or (c) be lifted off the substrate by tension. Entanglement occurred in only one case. In several cases the tether fouled on itself, limiting the radius of movement. Slack was added in cases where the small radius caused constant directional change. 
+Type 2 trials showed erratic movement, but no settling. If the lobster reached the arena wall, the tether was shortened the next time it was not under tension. Lobsters reaching the end of a tether would either (a) strain against it, (b) walk at the limit of the string, or (c) be lifted off the substrate by tension. Entanglement occurred in only one case. In several cases the tether fouled on itself, limiting the radius of movement. Slack was added in cases where the small radius caused constant directional change. Field reversal caused an instantaneous heading change (100%, N=2). One lobster was at the limit of the tether in the southern arena, heading east. It turned inward and completed a narrow loop before again reaching the end of the tether an resuming its counterclockwise course. The second was straining against the tether and moving clockwise in the northern arena; it also turned in and passed through the center of the arena, and reaching the opposite wall began a counterclockwise course.
 
-Figure: Sector positions of two lobsters during blind tether trials with no reversals (Type 2A). This shows a possible bias to 270° (West), but seems coincidental when examining video instead of still images.
+Type 3 trials showed discernible reactions (44%, N=18), but the tether made it difficult to establish the cause of directional changes. This increased to 72% if including reactions that may have been related but were not the defined >90° turn.
 
-In Type 2B a field reversal caused an instantaneous heading change (100%, N=2). One lobster was at the limit of the tether in the southern arena, heading east. It turned inward and completed a narrow loop before again reaching the end of the tether an resuming its counterclockwise course. The second was straining against the tether and moving clockwise in the northern arena; it also turned in and passed through the center of the arena, and reaching the opposite wall began a counterclockwise course.
+Of 27 non-random reversals (Type 4) performed over 11.75 min, 9 were ignored because the lobster was at the extent of the tether (including positive, negative and possible reactions). An obvious change in behavior occurred in 12 cases (67%, N=18). With a more lenient criteria for a related event there potentially would be 89% coincidence. There were 47 total reorientation events, occurring in 33% of 5 s time intervals.
 
-A series of reversals (Type 3) showed discernible reactions in some cases (44%, N=18), but the tether made it difficult to establish the cause of directional changes. This increased to 72% if including reactions that may have been related but were not the defined >90° turn. Of 27 non-random reversals (Type 4) performed over 11.75 min, 9 were ignored because the lobster was at the extent of the tether (including positive, negative and possible reactions). An obvious change in behavior occurred in 12 cases (67%, N=18). With a more lenient criteria for a related event there potentially would be 89% coincidence. There were 47 total reorientation events, occurring in 33% of 5 s time intervals.
+### Image analysis
 
+[WIP]
 
 ## Discussion
 
@@ -71,13 +77,11 @@ Events occurred in moving and stationary lobsters at the instant of reversal, in
 
 Two other behavioral responses were observed. In cases of frequent reversal for more than 15 min two lobsters made jerky vibratory movements and appeared agitated. This happened after reversals, and was followed by the lobster grasping one claw with the other, like wringing hands. When lobsters were stationary during reorientation, they would sometimes roll their tail inward and pause before or during a turn. Lobsters would also stop moving and exhibit this behavior during field reversals. This might indicate that tail is acting as a biological Hall effect sensor. Analyses of trace metals and electric fields in the lobster body might reveal more regarding the sensory mechanism. I have no explanation for the claw-wringing behavior. 
 
-Because of the simplicity of component vector addition, three such arrays can be aligned to x- y- and z-axes, and allow greater control of the uniform area. If the design includes Hall probes to sense each axial component of the field, a CPU can dynamically shift the power supplied to the coils. A moored or drifting system could in this way maintain a field of uniform magnitude and direction.
-
-The ability to change the apparent orientation of the geomagnetic field has applications in study of competent dispersal and population connectivity which could be altered by the fields induced by midwater and submarine direct-current cables. Future *in situ* work should investigate whether *H. americanus* post-larvae utilize a polarity compass in settlement and determine how individual behavior could scale to population distribution. 
+The ability to change the apparent orientation of the geomagnetic field has applications in study of competent dispersal and population connectivity which could be altered by the fields induced by midwater and submarine direct-current cables. Future *in situ* work should investigate whether *H. americanus* post-larvae utilize a polarity compass in settlement and determine how individual behavior could scale to population distribution. Three such arrays can be aligned to x- y- and z-axes to allow greater control of the uniform area, with sensors and a microcontroller to maintain a static uniform field in a moored or drifting apparatus.
 
 ## Acknowledgments
 
-Many thanks to the people whose enthusiasm made this possible: Anita Metzler and the New England Aquarium for the lobsters; Eric Hazen and Paul Bohn of the BU Electronics Design Facility for power, parts and knowledge; Michael Ruane and Robert Kotiuga of BU Electrical and Computer Engineering for consulting and lending equipment; Jonathan Perry and Justin Scace for tools and time; and Jelle Atema and Julia Spät for encouraging something ambitious. 
+Thanks to those whose enthusiasm made this possible: Anita Metzler and the New England Aquarium for lobsters; Eric Hazen and Paul Bohn of the Boston Unviversity Electronics Design Facility for power, parts and knowledge; Michael Ruane and Robert Kotiuga of Boston Unversity Electrical and Computer Engineering for consulting and lending equipment; Jonathan Perry and Justin Scace of the Boston Univsersity Biology Department for tools and time; and Jelle Atema and Julia Spät of Boston University Marine Program for encouraging something ambitious. 
 
 ## References
 
