@@ -63,7 +63,10 @@ Of 27 non-random reversals (Type 4) performed over 11.75 min, 9 were ignored bec
 
 ### Image analysis
 
-[WIP]
+![alt text](https://github.com/oceanicsdotio/helmholtz-lobsters/raw/main/figures/trial_heading_polar_plot.png "Heading distribution in treatment trials")
+
+![alt text](https://github.com/oceanicsdotio/helmholtz-lobsters/raw/main/figures/trial_position_polar_plot.png "Position distribution in treatment trials")
+
 
 ## Discussion
 
