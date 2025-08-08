@@ -24,7 +24,7 @@ Two square electromagnetic were constructed from 22 turns of 16-gauge insulated 
 
 The apparatus was setup in the laboratory such that apparent north varied <5° within the coils. Magnetometer measurements showed a horizontal field component of 0.238-0.245 Gauss, meaning the coils needed to produce $B$=0.478 G to reverse apparent north.
 
-The required supply voltages ($V$) were 3.41 and 3.50 based on Firester's equation (1966) and Ohm’s law, $V = {B \cdot L^2 \cdot R} \over 6.218. The round corners of the frame (5 cm ø) were ignored in the calculation. The coils produced $B$=0.415 G, resulting in a 300° deflection in apparent north.
+The required supply voltages ($V$) were 3.41 and 3.50 based on Firester's equation (1966) and Ohm’s law, $V = {B \cdot L^2 \cdot R} \over 6.218$. The round corners of the frame (5 cm ø) were ignored in the calculation. The coils produced $B$=0.415 G, resulting in a 300° deflection in apparent north.
 
 ### Arena
 
