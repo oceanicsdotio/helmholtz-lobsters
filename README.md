@@ -1,28 +1,30 @@
 # American lobsters change orientation in response to magnetic field reversals
 
-Lobster rely on powerful sensory capabilities during all life stages, and adults can  accurately find their way home over 200 km. Migrations of the spiny lobster are accomplished using the geomagnetic field. I proved this is also true in *H americanus*, by reversing the polarity of the local magnetic field. Understanding this ability has applications in population connectivity and ocean energy planning.
+Lobsters rely on powerful sensory capabilities during all life stages, and adults can  accurately find their way home over 200 km. Migrations of the spiny lobster are accomplished using the geomagnetic field. I proved this is also true in *H americanus*, by reversing the polarity of the local magnetic field. Understanding this ability has applications in population connectivity and ocean energy planning.
 
 ## Introduction
 
-Larval American lobsters (*Homarus americanus*) live suspended in surface waters, carried long distances by ocean currents. After their pelagic phase, lobsters become competent forward-swimming post-larvae (stage IV) and settle as they encounter suitable habitat (Factor 1995). Settlement is influenced by physical processes, but there is also evidence of complex navigation (Kingsford et al 2002, Cooper & Uzmann 1971). They use photo- and geotaxis in search of shelter (Kingsford et al 2002), can swim upstream, and even follow odors over long distances (Boudreau et al 1993). Foraging juveniles return to the same shelter night after night without visual cues (Karnofsky et al 1989). Adults embark on migrations >200 km, and displacement trials show that lobsters can home to known geographic areas (Cooper & Uzmann 1971). The similar migratory behavior of the spiny lobster (*Panulirus argus*) is accomplished by magnetic orientation, demonstrated by displacement (Boles & Lohmann 2003) and induced directional preference (Lohmann et al 1995) trials. Marine and terrestrial organisms are known to sense field inclination and polarity, and use geomagnetic cues to migrate (Cain et al 2005). The navigation capability of *H. americanus* anecdotally suggests they might share this sensory mechanism. This study demonstrates re-orientation in response to manipulation of the local geomagnetic field. 
+Larval American lobsters (*Homarus americanus*) live suspended in surface waters, carried long distances by ocean currents. After their pelagic phase, individuals become competent forward-swimming post-larvae (stage IV) and settle as they encounter suitable habitat (Factor 1995). Settlement is influenced by local physical processes, but there is also evidence of complex navigation (Kingsford et al 2002, Cooper & Uzmann 1971) using photo- and geotaxis in search of shelter (Kingsford et al 2002), and rheotaxis and olfaction to follow chemical signals to their source (Boudreau et al 1993). Foraging juveniles return to the same shelter night after night without visual cues (Karnofsky et al 1989), and adults embark on migrations >200 km and can home to known geographic areas (Cooper & Uzmann 1971). 
+
+Marine and terrestrial organisms are known to sense magnetic field inclination and polarity, and use geomagnetic cues to migrate (Cain et al 2005). Spiny lobster (*Panulirus argus*) navigate using geomagnetic orientation, demonstrated through displacement and induced directional preference trials (Boles & Lohmann 2003, Lohmann et al 1995). The navigation capabilities of *H. americanus* suggests they may share this sensory mechanism. This study demonstrates re-orientation in juveniles in response to reversal of the local magnetic field. 
 
 ## Methods
 
 ### Specimens
 
-Recently molted stage VI-VII juveniles (CL=8.8±0.5 mm, N=10) from the New England Aquarium Lobster Research Facility were used in the experiment. These were kept in individual mesh tubes in aerated 15 °C artificial seawater, with a 12:12 hr light schedule, and fed *Artemia* daily. 
+Recently-molted stage VI-VII juveniles (CL=8.8±0.5 mm, N=10) hatched and raised at the New England Aquarium Lobster Research Facility were used in the experiment. These were kept in individual mesh tubes in aerated 15 °C artificial seawater, with a 12:12 hr light schedule, and fed *Artemia* daily. 
 
-Lobsters were blindfolded with black plastic, wrapped under the rostrum and eyes and secured to the carapace with cyanoacrylic adhesive. Covering the eyestalks prevents orienting to light without harming the animal (Lohmann et al. 1995, Deutschlander et al 1999). Lobsters did not react to motion, and their ability to eat and walk was unaffected.
+Each was blindfolded with black plastic, wrapped under the rostrum and eyes and secured to the carapace with cyanoacrylic adhesive. Covering the eyestalks prevents orienting to light without harming the animal (Lohmann et al. 1995, Deutschlander et al 1999). Lobsters did not react to motion, while their ability to eat and walk was unaffected.
 
 A cotton thread was glued to the plastic to prevent contact with tank walls. Individuals made unsuccessful attempts to remove tethers immediately after affixing, but otherwise ignored them.
 
-### Helmholtz coil
+### Electromagnetic field
 
-Two square electromagnetic coils created overlapping electromagnetic fields with a 50 cm area in middle with <0.5% difference in strength (Lohmann et al 1995, Firester 1966). Coils were made with 22 turns of 16-gauge insulated copper wire around 150 cm PVC frames 82 cm apart. I assumed round corners had no effect (diameter = 5 cm).
+Two square electromagnetic were constructed from 22 turns of 16-gauge insulated copper wire around 150 cm ($L$) PVC frames spaced 82 cm apart to create a 50 cm area with <0.5% variation in field strength (Lohmann et al 1995, Firester 1966). The electrical resistances ($R$), including power supply leads, were 1.85 and 2.05 Ω (Fluke 8050A multimeter).
 
-Laboratory magnetometer readings of horizontal field strength were 0.238-0.245 G, with as much as 40° deviation in apparent north. To account for this, coils were located such that apparent north varied <5° between sides.
+The apparatus was setup in the laboratory such that apparent north varied <5° within the coils. Magnetometer measurements showed a horizontal field component of 0.238-0.245 Gauss, meaning the coils needed to produce $B$=0.478 G to reverse apparent north.
 
-Field strength of $B$=0.478 Gauss was used with Ohm’s law to calculate the voltage ($V$) necessary to reverse the magnetic field, $B=6.218 V S^{-2} R^{-1}$ (Firester 1966). Coil resistances ($R$) of 1.85 and 2.05 Ω (including power supply leads) were measured using a Fluke 8050A multimeter. Based on the side length and resistance, 3.41 and 3.50 V was supplied to the coils, producing $B$=0.415 G. This fell short of the $B$=0.478 G needed.
+The required supply voltages ($V$) were 3.41 and 3.50 based on Firester's equation (1966) and Ohm’s law, $V = {B \cdot L^2 \cdot R} \over 6.218. The round corners of the frame (5 cm ø) were ignored in the calculation. The coils produced $B$=0.415 G, resulting in a 300° deflection in apparent north.
 
 ### Arena
 
