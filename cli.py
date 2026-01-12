@@ -3,10 +3,34 @@ Load, transform, and do basic analysis on a lobster
 movement trials dataset.
 """
 from pandas import read_csv, DataFrame, to_datetime, concat
-from numpy import vectorize, atan2, pi, arange
+from numpy import vectorize, atan2, pi, arange, histogram
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
-import numpy as np
+from click import command, option, group
+
+
+
+@group()
+def cli():
+    """
+    Commandline interface for better UX when working with lobster
+    movement dataset.
+    """
+
+@group(name="plot")
+def cli_plot():
+    """
+    Commands for plotting lobster movement data.
+    """
+
+@group(name="lobster")
+def cli_plot_lobster():
+    """
+    Commands for plotting lobster angular position data.
+    """
+
+cli_plot.add_command(cli_plot_lobster)
+cli.add_command(cli_plot)
 
 def load_trials_data(file_path: str) -> DataFrame:
     """
@@ -118,8 +142,8 @@ def load_control_data(file_path: str) -> DataFrame:
 def plot_control_position(df: DataFrame) -> None:
     N = 12
     position = df["sector"].value_counts(normalize=True)
-    radians = position.index / 360 * 2 * np.pi
-    width = 2 * np.pi / N
+    radians = position.index / 360 * 2 * pi
+    width = 2 * pi / N
     ax = plt.subplot(projection='polar')
     ax.bar(radians, position.values, width=width, bottom=0.0, color="gray")
     plt.savefig("figures/control_position_polar_plot.png")
@@ -127,27 +151,77 @@ def plot_control_position(df: DataFrame) -> None:
 def plot_control_heading(df: DataFrame) -> None:
     N = 12
     heading = df["heading"].value_counts(normalize=True)
-    radians = heading.index / 360 * 2 * np.pi
-    width = 2 * np.pi / N
+    radians = heading.index / 360 * 2 * pi
+    width = 2 * pi / N
     ax = plt.subplot(projection='polar')
     ax.bar(radians, heading.values, width=width, bottom=0.0, color="gray")
     plt.savefig("figures/control_heading_polar_plot.png")
 
 def calc_histogram(df, bins: int, ax: Axes, color: str, alpha: float, label: str) -> None:
-    area, edges = np.histogram(df+180, bins=bins, range=(0, 360), density=True)
-    radians = (edges[:-1] / 360 + (360 / bins / 2)) * 2 * np.pi
-    width = 2 * np.pi / bins * 0.5
+    area, edges = histogram(df+180, bins=bins, range=(0, 360), density=True)
+    radians = (edges[:-1] / 360 + (360 / bins / 2)) * 2 * pi
+    width = 2 * pi / bins * 0.5
     ax.bar(radians, area, width=width, bottom=0.0, color="none", edgecolor=color, alpha=alpha, label=label)
 
-def plot_trial_position(
-    df: DataFrame,
+
+# @describe_position.command("head")
+# def describe_position_head():
+#     """
+#     Describe lobster position data.
+#     """
+#     trials = load_trials_data("data/trials.csv")
+#     print(trials.dtypes)
+#     print(trials.head())
+
+def concat_trials():
+    dfs = []
+    for trial_id in [16, 17, 18, 19, 20, 21, 22, 23, 24]:
+        trial = load_single_trial(f"data/trials/{trial_id}.csv")
+        trial["trial"] = trial_id
+        dfs.append(trial)
+    all_trials = concat(dfs)
+    return all_trials
+
+@cli_plot_lobster.command("heading")
+@option("--bins", default=12, help="Number of bins for the histogram.")
+@option("--alpha", default=0.75, help="Alpha transparency for the histogram bars")
+def cli_plot_lobster_heading(
     bins: int = 12,
     alpha: float = 0.75
-) -> None:
+):
     """
     Plot the angular position distribution of a lobster trial. Split data
     by whether the coil was on or off.
     """
+    df = concat_trials()
+    series = df["heading"]
+    mask = df["compass"] > 0
+    rows = df.shape[0]
+    on = series.loc[mask]
+    off = series.loc[~mask]
+    ax = plt.subplot(projection='polar')
+    calc_histogram(on, bins, ax, "red", alpha, "coil on")
+    calc_histogram(off, bins, ax, "blue", alpha, "coil off")
+    ax.grid(False)
+    ax.set_title(f"Heading distribution (N={rows})")
+    ax.set_yticklabels([])
+    plt.legend(loc="best")
+    plt.savefig("figures/trial_heading_polar_plot.png")
+    plt.close()
+    print("OK")
+
+@cli_plot_lobster.command("position")
+@option("--bins", default=12, help="Number of bins for the histogram.")
+@option("--alpha", default=0.75, help="Alpha transparency for the histogram bars")
+def cli_plot_lobster_position(
+    bins: int = 12,
+    alpha: float = 0.75
+):
+    """
+    Plot the angular position distribution of a lobster trial. Split data
+    by whether the coil was on or off.
+    """
+    df = concat_trials()
     series = df["angular_position"]
     mask = df["compass"] > 0
     rows = df.shape[0]
@@ -163,56 +237,22 @@ def plot_trial_position(
     plt.savefig("figures/trial_position_polar_plot.png")
     plt.close()
 
-def plot_trial_heading(
-    df: DataFrame,
-    bins: int = 12,
-    alpha: float = 0.75
-) -> None:
-    """
-    Plot the angular position distribution of a lobster trial. Split data
-    by whether the coil was on or off.
-    """
-    series = df["heading"]
-    mask = df["compass"] > 0
-    rows = df.shape[0]
-    on = series.loc[mask]
-    off = series.loc[~mask]
-    ax = plt.subplot(projection='polar')
-    calc_histogram(on, bins, ax, "red", alpha, "coil on")
-    calc_histogram(off, bins, ax, "blue", alpha, "coil off")
-    ax.grid(False)
-    ax.set_title(f"Heading distribution (N={rows})")
-    ax.set_yticklabels([])
-    plt.legend(loc="best")
-    plt.savefig("figures/trial_heading_polar_plot.png")
-    plt.close()
+# @position_cli.command("control")
+# def plot_control():
+#     """
+#     Plot lobster control data.
+#     """
+#     control = load_control_data("data/control.csv")
+#     plot_control_heading(control)
+#     plot_control_position(control)
 
 if __name__ == "__main__":
-    # trials = load_trials_data("data/trials.csv")
-    # print(trials.dtypes)
-    # print(trials.head())
+    cli()
 
-    # Data are already annotated with time since polarity switch,
-    # Can't join events and intervals because some time offset information
-    # was lost.
+    # # Data are already annotated with time since polarity switch,
+    # # Can't join events and intervals because some time offset information
+    # # was lost.
     # intervals = load_interval_data("data/intervals.csv")
     # timing = intervals["duration"].groupby(["trial"]).sum()
     # print(timing)
     # print(intervals.dtypes)
-    dfs = []
-    for trial_id in [16, 17, 18, 19, 20, 21, 22, 23, 24]:
-        trial = load_single_trial(f"data/trials/{trial_id}.csv")
-        trial["trial"] = trial_id
-        print(trial.dtypes)
-        print(trial.head())
-        dfs.append(trial)
-    all_trials = concat(dfs)
-    plot_trial_position(all_trials, bins=12)
-    plot_trial_heading(all_trials, bins=12)
-
-    # control = load_control_data("data/control.csv")
-    # print(control.dtypes)
-    # print(control.head())
-    # plot_control_heading(control)
-    # plot_control_position(control)
-
