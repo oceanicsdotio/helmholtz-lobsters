@@ -2,12 +2,12 @@
 Load, transform, and do basic analysis on a lobster
 movement trials dataset.
 """
-from pandas import read_csv, DataFrame, to_datetime, concat
-from numpy import vectorize, atan2, pi, arange, histogram
-import matplotlib.pyplot as plt
-from matplotlib.axes import Axes
-from click import command, option, group
 
+from pandas import read_csv, DataFrame
+from numpy import vectorize, atan2, pi, arange, histogram, append
+from matplotlib.pyplot import subplots
+from click import option, group, argument
+import polars as pl
 
 
 @group()
@@ -17,36 +17,54 @@ def cli():
     movement dataset.
     """
 
+
 @group(name="plot")
 def cli_plot():
     """
-    Commands for plotting lobster movement data.
+    Commands for plotting experiment data.
     """
 
-@group(name="lobster")
-def cli_plot_lobster():
-    """
-    Commands for plotting lobster angular position data.
-    """
 
-cli_plot.add_command(cli_plot_lobster)
 cli.add_command(cli_plot)
 
-def load_trials_data(file_path: str) -> DataFrame:
+
+@group(name="describe")
+def cli_describe():
     """
-    Load the lobster movement trials dataset from a CSV file.
+    Commands for describing experiment data.
     """
-    df: DataFrame = read_csv(file_path)
+
+
+cli.add_command(cli_describe)
+
+
+@group(name="lobster")
+def cli_describe_lobster():
+    """
+    Commands for describing lobster movement data.
+    """
+
+
+cli_describe.add_command(cli_describe_lobster)
+
+
+def load_trials_data_polars(file_path: str) -> pl.DataFrame:
+    """
+    Load the lobster movement trial polar dataset from a CSV file.
+    """
+    df: pl.DataFrame = pl.read_csv(file_path)
     date_col = "date"
-    df[date_col] = to_datetime(df[date_col])
-    return df.set_index("trial")
+    df = df.with_columns(pl.col(date_col).str.to_datetime())
+    return df
+
 
 def clock_string_to_seconds(clock_str: str) -> int:
     """
     Convert a clock string in the format 'HH:MM:SS' to total seconds.
     """
-    hours, minutes, seconds = map(int, clock_str.split(':'))
+    hours, minutes, seconds = map(int, clock_str.split(":"))
     return hours * 3600 + minutes * 60 + seconds
+
 
 def load_interval_data(file_path: str) -> DataFrame:
     """
@@ -60,6 +78,7 @@ def load_interval_data(file_path: str) -> DataFrame:
     df[stop] = convert(df[stop])
     df["duration"] = df[stop] - df[start]
     return df.set_index("trial")
+
 
 def load_events_data(file_path: str) -> DataFrame:
     """
@@ -75,11 +94,12 @@ def load_events_data(file_path: str) -> DataFrame:
     df[entangled] = df[entangled].fillna(False).astype(bool)
     return df.set_index("trial")
 
+
 def join_intervals_and_events(intervals: DataFrame, events: DataFrame) -> DataFrame:
     """
     Join intervals and events dataframes on the trial index.
-    Where the trial index matches, and an event falls within the interval, 
-    the time of the event in elapsed seconds is added 
+    Where the trial index matches, and an event falls within the interval,
+    the time of the event in elapsed seconds is added
     to the intervals dataframe.
     """
     joined = intervals.join(events, lsuffix="_intervals", rsuffix="_events")
@@ -88,33 +108,63 @@ def join_intervals_and_events(intervals: DataFrame, events: DataFrame) -> DataFr
     filtered["valid"] = filtered["stop"] - filtered["time"]
     return filtered
 
-def load_single_trial(file_path: str) -> DataFrame:
+
+
+def load_single_trial_polars(
+    file_path: str, time_column: str = "elapsed_time"
+) -> pl.DataFrame:
     """
     Load a single lobster movement trial dataset from a CSV file.
     """
-    df: DataFrame = read_csv(file_path)
-    pos = "angular_position"
-    time = "elapsed_time"
-    convert = vectorize(clock_string_to_seconds)
-    df[time] = convert(df[time])
-    df.set_index(time, inplace=True)
-    df.sort_index(inplace=True)
+    def calc_heading(row: dict) -> dict | None:
+        """
+        Calculate the heading and position from head and tail coordinates.
+        """
+        if any(x is None for x in row.values()):
+            return None
+        dx = row["x_head"] - row["x_tail"]
+        dy = row["y_head"] - row["y_tail"]
+        x = (row["x_head"] + row["x_tail"]) / 2
+        y = (row["y_head"] + row["y_tail"]) / 2
+        return {"position": atan2(x, y), "heading": atan2(dx, dy)}
+    struct = "computed"
+    return (
+        pl.read_csv(file_path)
+        .with_columns(
+            pl.col(time_column)
+            .map_elements(clock_string_to_seconds, return_dtype=pl.Int64)
+            .alias(time_column),
+            pl.struct(["x_head", "x_tail", "y_head", "y_tail"])
+            .map_elements(
+                calc_heading,
+                return_dtype=pl.Struct({"position": pl.Float64, "heading": pl.Float64}),
+            )
+            .alias(struct),
+        )
+        .unnest(struct)
+    )
 
-    x = (df["x_head"] + df["x_tail"]) / 2
-    y = (df["y_head"] + df["y_tail"]) / 2
-    df[pos] = atan2(x, y) * 180 / pi
-    df["velocity"] = (x.diff()**2 + y.diff()**2)**0.5
+def load_control_data(file_path: str, time_column: str = "elapsed_time") -> pl.DataFrame:
+    """
+    Load the control data for lobster movement trials from a CSV file.
 
-    dx = df["x_head"] - df["x_tail"]
-    dy = df["y_head"] - df["y_tail"]
-    df["heading"] = atan2(dx, dy) * 180 / pi
-    # d1 = "heading_first_derivative"
-    # df[d1] = df["heading"].diff()
-    # df[d1] = df[d1].where(df[d1] > -180, df[d1] + 360)
-    # df[d1] = df[d1].where(df[d1] < 180, df[d1] - 360)
-    return df
+    Convert time to elapsed seconds, and position and heading to radians.
+    """
+    return (
+        pl.read_csv(file_path)
+        .with_columns(
+            pl.col(time_column)
+            .map_elements(clock_string_to_seconds, return_dtype=pl.Int64)
+            .alias(time_column),
+            (pl.col("sector") / 360 * 2 * pi).alias("position"),
+            (pl.col("heading") / 360 * 2 * pi).alias("heading")
+        )
+    )
 
-def join_elapsed_time_since_event(trial_data: DataFrame, trial: int, events: DataFrame) -> DataFrame:
+
+def join_elapsed_time_since_event(
+    trial_data: DataFrame, trial: int, events: DataFrame
+) -> DataFrame:
     """
     Calculate the time since the last event in each interval
     """
@@ -128,130 +178,62 @@ def join_elapsed_time_since_event(trial_data: DataFrame, trial: int, events: Dat
         trial_data["coil_on"][loc:rows] = row.field
         trial_data["since_event"][loc:rows] = arange(rows - loc)
 
-def load_control_data(file_path: str) -> DataFrame:
+
+
+@cli_describe_lobster.command("trials")
+def cli_describe_lobster_trials():
     """
-    Load the control data for lobster movement trials from a CSV file.
+    Describe lobster position data.
     """
-    df: DataFrame = read_csv(file_path)
-    time = "elapsed_time"
-    convert = vectorize(clock_string_to_seconds)
-    df[time] = convert(df[time])
-    df.set_index("trial", inplace=True)
-    return df
-
-def plot_control_position(df: DataFrame) -> None:
-    N = 12
-    position = df["sector"].value_counts(normalize=True)
-    radians = position.index / 360 * 2 * pi
-    width = 2 * pi / N
-    ax = plt.subplot(projection='polar')
-    ax.bar(radians, position.values, width=width, bottom=0.0, color="gray")
-    plt.savefig("figures/control_position_polar_plot.png")
-
-def plot_control_heading(df: DataFrame) -> None:
-    N = 12
-    heading = df["heading"].value_counts(normalize=True)
-    radians = heading.index / 360 * 2 * pi
-    width = 2 * pi / N
-    ax = plt.subplot(projection='polar')
-    ax.bar(radians, heading.values, width=width, bottom=0.0, color="gray")
-    plt.savefig("figures/control_heading_polar_plot.png")
-
-def calc_histogram(df, bins: int, ax: Axes, color: str, alpha: float, label: str) -> None:
-    area, edges = histogram(df+180, bins=bins, range=(0, 360), density=True)
-    radians = (edges[:-1] / 360 + (360 / bins / 2)) * 2 * pi
-    width = 2 * pi / bins * 0.5
-    ax.bar(radians, area, width=width, bottom=0.0, color="none", edgecolor=color, alpha=alpha, label=label)
+    trials = load_trials_data_polars("data/trials.csv")
+    print(trials.describe())
 
 
-# @describe_position.command("head")
-# def describe_position_head():
-#     """
-#     Describe lobster position data.
-#     """
-#     trials = load_trials_data("data/trials.csv")
-#     print(trials.dtypes)
-#     print(trials.head())
-
-def concat_trials():
-    dfs = []
-    for trial_id in [16, 17, 18, 19, 20, 21, 22, 23, 24]:
-        trial = load_single_trial(f"data/trials/{trial_id}.csv")
-        trial["trial"] = trial_id
-        dfs.append(trial)
-    all_trials = concat(dfs)
-    return all_trials
-
-@cli_plot_lobster.command("heading")
+@cli_plot.command("lobster")
+@argument("column", default="heading")
 @option("--bins", default=12, help="Number of bins for the histogram.")
-@option("--alpha", default=0.75, help="Alpha transparency for the histogram bars")
-def cli_plot_lobster_heading(
-    bins: int = 12,
-    alpha: float = 0.75
-):
+def cli_plot_lobster(column: str, bins: int = 12):
     """
-    Plot the angular position distribution of a lobster trial. Split data
-    by whether the coil was on or off.
+    Plot the position distribution of a lobster trial. This doesn't use derivatives,
+    so we are free to load and concatenate all the trials in one go. The records are then
+    partitioned by whether the coil was on or off.
     """
-    df = concat_trials()
-    series = df["heading"]
-    mask = df["compass"] > 0
-    rows = df.shape[0]
-    on = series.loc[mask]
-    off = series.loc[~mask]
-    ax = plt.subplot(projection='polar')
-    calc_histogram(on, bins, ax, "red", alpha, "coil on")
-    calc_histogram(off, bins, ax, "blue", alpha, "coil off")
+    fig, ax = subplots(subplot_kw={"projection": "polar"})
+    df = load_control_data("data/control.csv")
+    series = df[column]
+    rows = series.count()
+    area, edges = histogram(series, bins=bins, range=(0, 2*pi), density=True)
+    area = append(area, area[0])
+    ax.plot(edges, area, color="black", label="control")
+    df = load_single_trial_polars("data/trials/*.csv")
+    for mask, color, label in [
+        (pl.col("compass") > 0, "red", "coil on"),
+        (pl.col("compass") <= 0, "blue", "coil off"),
+    ]:
+        series = df.filter(mask)[column]
+        rows += series.count()
+        area, edges = histogram(series, bins=bins, range=(-pi, pi), density=True)
+        area = append(area, area[0])
+        ax.plot(
+            edges,
+            area,
+            color=color,
+            label=label
+        )
     ax.grid(False)
-    ax.set_title(f"Heading distribution (N={rows})")
+    ax.set_title(f"{column.capitalize()} distribution (N={rows})")
     ax.set_yticklabels([])
-    plt.legend(loc="best")
-    plt.savefig("figures/trial_heading_polar_plot.png")
-    plt.close()
+    fig.legend()
+    fig.savefig(f"figures/trial_{column}_polar_plot.png")
     print("OK")
 
-@cli_plot_lobster.command("position")
-@option("--bins", default=12, help="Number of bins for the histogram.")
-@option("--alpha", default=0.75, help="Alpha transparency for the histogram bars")
-def cli_plot_lobster_position(
-    bins: int = 12,
-    alpha: float = 0.75
-):
-    """
-    Plot the angular position distribution of a lobster trial. Split data
-    by whether the coil was on or off.
-    """
-    df = concat_trials()
-    series = df["angular_position"]
-    mask = df["compass"] > 0
-    rows = df.shape[0]
-    on = series.loc[mask]
-    off = series.loc[~mask]
-    ax = plt.subplot(projection='polar')
-    calc_histogram(on, bins, ax, "red", alpha, "coil on")
-    calc_histogram(off, bins, ax, "blue", alpha, "coil off")
-    ax.grid(False)
-    ax.set_title(f"Angular position distribution (N={rows})")
-    ax.set_yticklabels([])
-    plt.legend(loc="best")
-    plt.savefig("figures/trial_position_polar_plot.png")
-    plt.close()
-
-# @position_cli.command("control")
-# def plot_control():
-#     """
-#     Plot lobster control data.
-#     """
-#     control = load_control_data("data/control.csv")
-#     plot_control_heading(control)
-#     plot_control_position(control)
 
 if __name__ == "__main__":
     cli()
 
-    # # Data are already annotated with time since polarity switch,
-    # # Can't join events and intervals because some time offset information
-    # # was lost.
+    # Data are already annotated with time since polarity switch,
+    # Can't join events and intervals because some time offset information
+    # was lost.
     # intervals = load_interval_data("data/intervals.csv")
     # timing = intervals["duration"].groupby(["trial"]).sum()
     # print(timing)
