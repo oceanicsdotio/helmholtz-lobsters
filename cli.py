@@ -14,6 +14,8 @@ from enum import Enum
 from pathlib import Path
 from polars import col, Struct, Float64, struct, Int64
 import polars as pl
+from roifile import roiread, ImagejRoi
+from typing import List
 
 FIGURES = Path(__file__).parent / "figures"
 
@@ -116,19 +118,6 @@ def load_interval_data(file_path: str) -> pd.DataFrame:
     return df.set_index("trial")
 
 
-def load_events_data(file_path: str) -> pd.DataFrame:
-    """
-    Load the lobster movement events dataset from a CSV file.
-    """
-    df = read_csv(file_path)
-    time = "time"
-    field = "field"
-    entangled = "entangled"
-    convert = vectorize(clock_string_to_seconds)
-    df[time] = convert(df[time])
-    df[field] = df[field].replace("F", "").astype(bool)
-    df[entangled] = df[entangled].fillna(False).astype(bool)
-    return df.set_index("trial")
 
 
 def join_intervals_and_events(intervals: pd.DataFrame, events: pd.DataFrame) -> pd.DataFrame:
@@ -223,6 +212,34 @@ def cli_describe_lobster_trials():
     """
     trials = load_trials_data_polars("data/trials.csv")
     print(trials.describe())
+
+def load_events_data(file_path: str) -> pl.DataFrame:
+    """
+    Load the lobster movement events dataset from a CSV file.
+    """
+    df = pl.read_csv(file_path)
+    time = "time"
+    field = "field"
+    entangled = "entangled"
+    return df.with_columns(
+        col(time).map_elements(clock_string_to_seconds, return_dtype=Int64).alias(time),
+        (col(field) == "T").alias(field),
+        (col(entangled).fill_null("F") == "T").alias(entangled)
+    )
+
+
+@cli_describe_lobster.command("roi")
+def cli_describe_lobster_roi():
+    """
+    Describe lobster position data.
+    """
+    trial = 22
+    data = roiread(SourceData.TRIALS_DIR.value + f"0{trial}_ROI.zip")
+    if isinstance(data, list):
+        print((data[0].coordinates() - 200.0) / 200.0)
+    
+    events = load_events_data(SourceData.EVENTS.value).filter(col("trial") == trial)
+    print(events)
 
 
 @cli_plot.command("lobster")
