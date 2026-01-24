@@ -3,12 +3,48 @@ Load, transform, and do basic analysis on a lobster
 movement trials dataset.
 """
 
-from pandas import read_csv, DataFrame
+from pandas import read_csv
+import pandas as pd
 from numpy import vectorize, atan2, pi, arange, histogram, append
 from matplotlib.pyplot import subplots
+from matplotlib.figure import Figure
+from matplotlib.projections.polar import PolarAxes
 from click import option, group, argument
+from enum import Enum
+from pathlib import Path
+from polars import col, Struct, Float64, struct, Int64
 import polars as pl
 
+FIGURES = Path(__file__).parent / "figures"
+
+class Commands(Enum):
+    """
+    Consistent command names for the CLI.
+    """
+    PLOT = "plot"
+    DESCRIBE = "describe"
+    LOBSTER = "lobster"
+
+class SourceData(Enum):
+    """
+    Docstring for Metadata
+    """
+    CONTROL = "data/control.csv"
+    TRIALS_DIR = "data/trials/"
+    TRIALS = "data/trials.csv"
+    INTERVALS = "data/intervals.csv"
+    EVENTS = "data/events.csv"
+    LOBSTERS = "data/lobsters.csv"
+    GEOMAGNETIC_FIELD = "data/magnetic-field.csv"
+    CONTROL_EVENTS = "data/control-events.csv"
+
+class Palette(Enum):
+    """
+    Color palette for plotting.
+    """
+    ON = "red"
+    OFF = "blue"
+    CONTROL = "black"
 
 @group()
 def cli():
@@ -18,7 +54,7 @@ def cli():
     """
 
 
-@group(name="plot")
+@group(name=Commands.PLOT.value)
 def cli_plot():
     """
     Commands for plotting experiment data.
@@ -28,7 +64,7 @@ def cli_plot():
 cli.add_command(cli_plot)
 
 
-@group(name="describe")
+@group(name=Commands.DESCRIBE.value)
 def cli_describe():
     """
     Commands for describing experiment data.
@@ -38,7 +74,7 @@ def cli_describe():
 cli.add_command(cli_describe)
 
 
-@group(name="lobster")
+@group(name=Commands.LOBSTER.value)
 def cli_describe_lobster():
     """
     Commands for describing lobster movement data.
@@ -54,7 +90,7 @@ def load_trials_data_polars(file_path: str) -> pl.DataFrame:
     """
     df: pl.DataFrame = pl.read_csv(file_path)
     date_col = "date"
-    df = df.with_columns(pl.col(date_col).str.to_datetime())
+    df = df.with_columns(col(date_col).str.to_datetime())
     return df
 
 
@@ -66,11 +102,11 @@ def clock_string_to_seconds(clock_str: str) -> int:
     return hours * 3600 + minutes * 60 + seconds
 
 
-def load_interval_data(file_path: str) -> DataFrame:
+def load_interval_data(file_path: str) -> pd.DataFrame:
     """
     Load the lobster movement intervals dataset from a CSV file.
     """
-    df: DataFrame = read_csv(file_path)
+    df = read_csv(file_path)
     start = "start"
     stop = "stop"
     convert = vectorize(clock_string_to_seconds)
@@ -80,11 +116,11 @@ def load_interval_data(file_path: str) -> DataFrame:
     return df.set_index("trial")
 
 
-def load_events_data(file_path: str) -> DataFrame:
+def load_events_data(file_path: str) -> pd.DataFrame:
     """
     Load the lobster movement events dataset from a CSV file.
     """
-    df: DataFrame = read_csv(file_path)
+    df = read_csv(file_path)
     time = "time"
     field = "field"
     entangled = "entangled"
@@ -95,7 +131,7 @@ def load_events_data(file_path: str) -> DataFrame:
     return df.set_index("trial")
 
 
-def join_intervals_and_events(intervals: DataFrame, events: DataFrame) -> DataFrame:
+def join_intervals_and_events(intervals: pd.DataFrame, events: pd.DataFrame) -> pd.DataFrame:
     """
     Join intervals and events dataframes on the trial index.
     Where the trial index matches, and an event falls within the interval,
@@ -127,21 +163,21 @@ def load_single_trial_polars(
         x = (row["x_head"] + row["x_tail"]) / 2
         y = (row["y_head"] + row["y_tail"]) / 2
         return {"position": atan2(x, y), "heading": atan2(dx, dy)}
-    struct = "computed"
+    alias = "computed"
     return (
         pl.read_csv(file_path)
         .with_columns(
-            pl.col(time_column)
-            .map_elements(clock_string_to_seconds, return_dtype=pl.Int64)
+            col(time_column)
+            .map_elements(clock_string_to_seconds, return_dtype=Int64)
             .alias(time_column),
-            pl.struct(["x_head", "x_tail", "y_head", "y_tail"])
+            struct(["x_head", "x_tail", "y_head", "y_tail"])
             .map_elements(
                 calc_heading,
-                return_dtype=pl.Struct({"position": pl.Float64, "heading": pl.Float64}),
+                return_dtype=Struct({"position": Float64, "heading": Float64}),
             )
-            .alias(struct),
+            .alias(alias),
         )
-        .unnest(struct)
+        .unnest(alias)
     )
 
 def load_control_data(file_path: str, time_column: str = "elapsed_time") -> pl.DataFrame:
@@ -153,18 +189,18 @@ def load_control_data(file_path: str, time_column: str = "elapsed_time") -> pl.D
     return (
         pl.read_csv(file_path)
         .with_columns(
-            pl.col(time_column)
-            .map_elements(clock_string_to_seconds, return_dtype=pl.Int64)
+            col(time_column)
+            .map_elements(clock_string_to_seconds, return_dtype=Int64)
             .alias(time_column),
-            (pl.col("sector") / 360 * 2 * pi).alias("position"),
-            (pl.col("heading") / 360 * 2 * pi).alias("heading")
+            (col("sector") / 360 * 2 * pi).alias("position"),
+            (col("heading") / 360 * 2 * pi).alias("heading")
         )
     )
 
 
 def join_elapsed_time_since_event(
-    trial_data: DataFrame, trial: int, events: DataFrame
-) -> DataFrame:
+    trial_data: pd.DataFrame, trial: int, events: pd.DataFrame
+) -> pd.DataFrame:
     """
     Calculate the time since the last event in each interval
     """
@@ -190,41 +226,41 @@ def cli_describe_lobster_trials():
 
 
 @cli_plot.command("lobster")
-@argument("column", default="heading")
+@argument("parameter", default="heading")
 @option("--bins", default=12, help="Number of bins for the histogram.")
-def cli_plot_lobster(column: str, bins: int = 12):
+def cli_plot_lobster(parameter: str, bins: int = 12):
     """
-    Plot the position distribution of a lobster trial. This doesn't use derivatives,
-    so we are free to load and concatenate all the trials in one go. The records are then
-    partitioned by whether the coil was on or off.
+    Plot the position or heading distribution of lobster trials. 
+    This doesn't use derivatives, so we load and concatenate all the flat files. 
+    The records are then partitioned by whether the coil was on or off.
     """
-    fig, ax = subplots(subplot_kw={"projection": "polar"})
-    df = load_control_data("data/control.csv")
-    series = df[column]
-    rows = series.count()
+    control = load_control_data(SourceData.CONTROL.value)
+    series = control[parameter]
     area, edges = histogram(series, bins=bins, range=(0, 2*pi), density=True)
-    area = append(area, area[0])
-    ax.plot(edges, area, color="black", label="control")
-    df = load_single_trial_polars("data/trials/*.csv")
+    area = append(area, area[0])  # close the circle
+    control_label = "Control (N=" + str(series.count()) + ")"
+    trials = load_single_trial_polars(SourceData.TRIALS_DIR.value + "*.csv")
+    fig, ax = subplots(subplot_kw={"projection": "polar"})
+    ax.plot(edges, area, color=Palette.CONTROL.value, label=control_label)
+    state = col("compass")
     for mask, color, label in [
-        (pl.col("compass") > 0, "red", "coil on"),
-        (pl.col("compass") <= 0, "blue", "coil off"),
+        (state <= 0, Palette.OFF.value, "Off"),
+        (state > 0, Palette.ON.value, "On"),
     ]:
-        series = df.filter(mask)[column]
-        rows += series.count()
+        series = trials.filter(mask)[parameter]
         area, edges = histogram(series, bins=bins, range=(-pi, pi), density=True)
         area = append(area, area[0])
         ax.plot(
             edges,
             area,
             color=color,
-            label=label
+            label=label + f" (N={series.count()})",
         )
     ax.grid(False)
-    ax.set_title(f"{column.capitalize()} distribution (N={rows})")
+    ax.set_title(f"Lobster {parameter} distribution by coil state")
     ax.set_yticklabels([])
-    fig.legend()
-    fig.savefig(f"figures/trial_{column}_polar_plot.png")
+    fig.legend(loc="lower right", frameon=False)
+    fig.savefig(FIGURES / f"{Commands.LOBSTER.value}_{parameter}.png")
     print("OK")
 
 
