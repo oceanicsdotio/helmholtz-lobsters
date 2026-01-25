@@ -1,6 +1,6 @@
 # American lobsters change orientation in response to magnetic field reversals
 
-Lobsters rely on powerful sensory capabilities during all life stages, and adults can  accurately find their way home over 200 km. Migrations of the spiny lobster are accomplished using the geomagnetic field. I proved this is also true in *H americanus*, by reversing the polarity of the local magnetic field. Understanding this ability has applications in population connectivity and ocean energy planning.
+Lobsters rely on powerful sensory capabilities during all life stages, and adults can accurately find their way home over 200 km. Migrations of the spiny lobster are accomplished using the geomagnetic field. I proved this is also true in *H americanus*, by reversing the polarity of the local magnetic field. Understanding this ability has applications in population connectivity and ocean energy planning.
 
 ## Introduction
 
@@ -12,9 +12,9 @@ Marine and terrestrial organisms are known to sense magnetic field inclination a
 
 ### Specimens
 
-Recently-molted stage VI-VII juveniles (CL=8.8±0.5 mm, N=10) hatched and raised at the New England Aquarium Lobster Research Facility were used in the experiment. These were kept in individual mesh tubes in aerated 15 °C artificial seawater, with a 12:12 hr light schedule, and fed *Artemia* daily. 
+Recently-molted stage VI-VII juveniles (CL=8.8±0.5 mm, N=10) hatched and raised at the New England Aquarium Lobster Research Facility were used in the experiment. These were kept in individual mesh tubes in aerated 15 °C artificial seawater, with a 12:12 hr light schedule, and fed *Artemia* daily.
 
-Each was blindfolded with black plastic, wrapped under the rostrum and eyes and secured to the carapace with cyanoacrylic adhesive. Covering the eyestalks prevents orienting to light without harming the animal (Lohmann et al. 1995, Deutschlander et al 1999). Lobsters did not react to motion, while their ability to eat and walk was unaffected.
+Each was blindfolded with black plastic, wrapped under the rostrum and eyes and secured to the carapace with cyanoacrylic adhesive. Covering the eyestalks prevents orienting to light without harming the animal (Lohmann et al. 1995, Deutschlander et al 1999). Lobsters did not react to motion, while their ability to eat and walk was unaffected. Individuals were used in at most one trial per day.
 
 ### Magnetic field
 
@@ -22,21 +22,23 @@ Two square electromagnetic were constructed from 22 turns of 16-gauge insulated 
 
 The apparatus was setup in the laboratory such that apparent north varied <5° within the coils. Magnetometer measurements showed a horizontal field component of 0.238-0.245 Gauss, meaning the coils needed to produce $B$=0.478 G to reverse apparent north.
 
-Supply voltages ($V$) were calculate at 3.41 and 3.50 based on Firester's equation (1966) and Ohm’s law, $V = {{B \cdot L^2 \cdot R} \over 6.218}$. The round corners of the frame (5 cm ø) were ignored in the calculation. The coils produced $B$=0.415 G, resulting in a 300° deflection in apparent north.
+Supply voltages ($V$) were calculate at 3.41 and 3.50 based on Firester's equation (1966) and Ohm’s law, $V = {{B \cdot L^2 \cdot R} \over 6.218}$. The round corners of the frame (5 cm ø) were ignored in the calculation. The coils produced $B$=0.415 G, resulting in a 150° deflection in apparent north.
 
 ### Trials
 
-The trial arena was a circular plastic basin (28 cm ø) centered in the coils at 75 cm height. The bottom was covered with a uniform layer of mixed fine and coarse sand. Water was replaced between trials (depth = 5 cm) and sediment allowed to settle. A transparent acrylic cover was marked with 30° sectors to aid analysis. 
+The trial arena was a circular plastic basin (28 cm ø) centered in the coils at 75 cm height. The bottom was covered with a uniform layer of mixed fine and coarse sand. Water was replaced between trials (depth = 5 cm) and sediment allowed to settle. A transparent acrylic cover was marked with 30° sectors to aid analysis.
 
-In baseline trials (Type 1, N=11) each specimen was corralled (4 cm ø) for at least 5 minutes, then observed wandering for 20 minutes. They tended to reach the wall of the tank and follow it, sometime reversing direction, and eventually settled in depressions in the sand substrate against the tank wall. To prevent interactions with the wall a cotton tether was glued to the dorsal carapace and secured to the center of the acrylic cover. Individuals made unsuccessful attempts to remove tethers immediately after affixing, but otherwise ignored them.
+A downward facing digital video camera recorded each trial. The helmholtz coil was draped with black plastic to prevent glare in the recording, and to reduce shadows that might bias behavior. Video was converted to a still image sequences, and position and heading time series determined by labelling head and tail position in each frame using ImageJ software.
 
-For initial treatment trials lobsters were tethered for 30 and 40 minutes, with a single field reversal at 20 and 30 minutes, respectively (Type 2, N=2).
+#### Control
 
-Switching trials had no acclimation period (Type 3, N=9). The first Type 3 trials toggled coil state every 2 minutes (N=2), but many of the reversals were confounded by interactions with the tether. In subsequent trials (N=7) switching opportunistic as lobsters were crossing the middle of the arena,  about every 15–60 seconds.
+In control trials each specimen was corralled within 2 cm of the center of the tank for at least 5 minutes, then observed freely wandering for 20 minutes. They tended to reach the wall of the tank and follow it, sometimes reversing direction, settled in depressions in the sand substrate against the tank wall. Images and data were collected every 1 minute.
 
-### Data collection
+#### Exposure
 
-A downward facing digital video camera recorded each trial. The PVC frame for the coils was draped with black plastic sheet to prevent glare in the recording, and to reduce shadows that might bias behavioral trials. Video was converted to a still image sequences, and position and heading time series determined by manually labelling head and tail position in each frame using ImageJ software. The series had an interval of 1 minute for Type 1 and 2 trials, and 1 second for Type 3.
+To prevent interactions with the tank wall in exposure trials, a cotton tether was glued to the dorsal carapace and secured to the center of the acrylic cover. Individuals made unsuccessful attempts to remove tethers immediately after affixing, but otherwise ignored them. To test the methodology, lobsters were observed for ~30 minutes, with a single field reversal after ~20 minutes (N=2). Both lobsters appeared to make an instantaneous change in direction when the coil was turned on.
+
+To increase the number of samples, coil state was toggled every 2 minutes in two additional trials (N=2). However, during many of the regular animals were at the end of the tether. Seven further trials (N=7) used opportunistic switching as lobsters crossed the middle of the tank, about every 15–60 seconds. Regular and haphazard events are considered interchangeable in the analysis. These trials had no acclimation period, and images were captured every 1 second.
 
 ### Analysis
 
