@@ -18,11 +18,11 @@ Each was blindfolded with black plastic, wrapped under the rostrum and eyes and 
 
 ### Magnetic field
 
-Two square electromagnetic were constructed from 22 turns of 16-gauge insulated copper wire around 150 cm ($L$) PVC frames spaced 82 cm apart to create a 50 cm area with <0.5% variation in field strength (Lohmann et al 1995, Firester 1966, Caprari 1995, Garrett 1967, Merritt et al 1983). The electrical resistances ($R$), including power supply leads, were 1.85 and 2.05 Ω (Fluke 8050A multimeter).
+Two square electromagnets were constructed from 22 turns of 16-gauge insulated copper wire, wound around 150 cm ($L$) PVC frames spaced 82 cm apart to create a 50 cm area with <0.5% variation in field strength (Lohmann et al 1995, Firester 1966, Caprari 1995, Garrett 1967, Merritt et al 1983). The electrical resistances ($R$), including power supply leads, were 1.85 and 2.05 Ω (Fluke 8050A multimeter).
 
-The apparatus was setup in the laboratory such that apparent north varied <5° within the coils. Magnetometer measurements showed a horizontal field component of 0.238-0.245 Gauss, meaning the coils needed to produce $B$=0.478 G to reverse apparent north.
+The apparatus was set up in the laboratory such that apparent north varied <5° within the coils. Magnetometer measurements showed a horizontal field component of 0.238-0.245 Gauss, meaning the coils needed to produce $B$=0.478 G to reverse apparent north.
 
-Supply voltages ($V$) were calculate at 3.41 and 3.50 based on Firester's equation (1966) and Ohm’s law, $V = {{B \cdot L^2 \cdot R} \over 6.218}$. The round corners of the frame (5 cm ø) were ignored in the calculation. The coils produced $B$=0.415 G, resulting in a 150° deflection in apparent north.
+Supply voltages ($V$) were calculate at 3.41 and 3.50 based on Firester's equation (1966) and Ohm’s law, $V = {{B \cdot L^2 \cdot R} \over 6.218}$. The round corners of the frame (5 cm ø) were ignored in the calculation. The coils produced $B$=0.415 G, resulting in a ~150° deflection in apparent north.
 
 ### Trials
 
@@ -36,9 +36,9 @@ In control trials each specimen was corralled within 2 cm of the center of the t
 
 #### Exposure
 
-To prevent interactions with the tank wall in exposure trials, a cotton tether was glued to the dorsal carapace and secured to the center of the acrylic cover. Individuals made unsuccessful attempts to remove tethers immediately after affixing, but otherwise ignored them. To test the methodology, lobsters were observed for ~30 minutes, with a single field reversal after ~20 minutes (N=2). Both lobsters appeared to make an instantaneous change in direction when the coil was turned on.
+To prevent interactions with the tank wall in exposure trials, a cotton tether was glued to the dorsal carapace and secured to the center of the acrylic cover. Individuals made unsuccessful attempts to remove tethers immediately after affixing, but otherwise ignored them. To test the methodology, lobsters (N=2) were observed during a single field reversal after ~20 minutes of movement. Both lobsters appeared to make an instantaneous change in direction when the coil was turned on.
 
-To increase the number of samples, coil state was toggled every 2 minutes in two additional trials (N=2). However, during many of the regular animals were at the end of the tether. Seven further trials (N=7) used opportunistic switching as lobsters crossed the middle of the tank, about every 15–60 seconds. Regular and haphazard events are considered interchangeable in the analysis. These trials had no acclimation period, and images were captured every 1 second.
+To increase the number of samples, coil state was toggled every 2 minutes for 20 minutes in two additional trials (N=2). Animals were at the end of the tether during many of these regular events, so seven more 20 minute trials (N=7) used opportunistic switching as lobsters crossed the middle of the tank, about every 15–60 seconds. Regular and haphazard events are considered interchangeable in the analysis. These trials had no acclimation period, and images were captured every 1 second.
 
 ### Analysis
 
@@ -86,7 +86,7 @@ The ability to change the apparent orientation of the geomagnetic field has appl
 
 ## Acknowledgments
 
-Thanks to those whose enthusiasm made this possible: Anita Metzler and the New England Aquarium for lobsters; Eric Hazen and Paul Bohn of the Boston Unviversity Electronics Design Facility for power, parts and knowledge; Michael Ruane and Robert Kotiuga of Boston Unversity Electrical and Computer Engineering for consulting and lending equipment; Jonathan Perry and Justin Scace of the Boston Univsersity Biology Department for tools and time; and Jelle Atema and Julia Spät of Boston University Marine Program for encouraging something ambitious. 
+Thank you Anita Metzler and the New England Aquarium for lobsters; Eric Hazen and Paul Bohn of the Boston Unviversity Electronics Design Facility for power, parts and knowledge; Michael Ruane and Robert Kotiuga of Boston Unversity Electrical and Computer Engineering for consulting and lending equipment; Jonathan Perry and Justin Scace of the Boston University Biology Department for tools and time; and Jelle Atema and Julia Spät of Boston University Marine Program for encouragement.
 
 ## References
 
