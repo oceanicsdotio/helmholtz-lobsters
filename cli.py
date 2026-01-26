@@ -2,8 +2,7 @@
 Load, transform, and do basic analysis on a lobster
 movement trials dataset.
 
-- `plot lobster histogram heading`: OK
-- `plot lobster histogram position`: OK
+- `plot lobster histogram <PARAMETER>`: OK
 - `plot lobster trajectory <TRIAL>`: OK
 - `describe lobster trials`: WIP
 - `describe lobster roi`: WIP
@@ -14,19 +13,11 @@ from enum import Enum
 from pathlib import Path
 from itertools import pairwise
 from zipfile import ZipFile
-from numpy import atan2, pi, histogram, append, vstack, meshgrid
+from numpy import atan2, pi, histogram, vstack, meshgrid
 import numpy as np
 from matplotlib.pyplot import subplots
 from click import option, group, argument, Choice
-from polars import (
-    col,
-    Struct,
-    Float64,
-    struct,
-    Int64,
-    DataFrame,
-    Config
-)
+from polars import col, Struct, Float64, struct, Int64, DataFrame, read_csv, Series
 import polars as pl
 from roifile import roiread, ImagejRoi
 from sklearn.neighbors import KernelDensity
@@ -34,7 +25,8 @@ from sklearn.neighbors import KernelDensity
 FIGURES = Path(__file__).parent / "figures"
 DATA = Path(__file__).parent / "data"
 
-class Commands(Enum):
+
+class Cmd(Enum):
     """
     Consistent command names for the CLI.
     """
@@ -43,11 +35,28 @@ class Commands(Enum):
     DESCRIBE = "describe"
     LOBSTER = "lobster"
     HISTOGRAM = "histogram"
+    TRAJECTORY = "trajectory"
+    TRIALS = "trials"
+
+
+@group(name=Cmd.LOBSTER.value)
+def cli_plot_lobster():
+    """
+    Cmd for describing lobster movement data.
+    """
+
+
+@group(name=Cmd.LOBSTER.value)
+def cli_describe_lobster():
+    """
+    Cmd for describing lobster movement data.
+    """
 
 
 class PlotLobsterOptions(Enum):
     """
-    Parameters for lobster plotting.
+    Parameters for lobster plotting. Used for Click type checking
+    with a Choice.
     """
 
     POSITION = "position"
@@ -56,7 +65,7 @@ class PlotLobsterOptions(Enum):
 
 class SourceData(Enum):
     """
-    Docstring for Metadata
+    Data and metadata file paths
     """
 
     CONTROL = DATA / "control.csv"
@@ -65,8 +74,6 @@ class SourceData(Enum):
     INTERVALS = DATA / "intervals.csv"
     EVENTS = DATA / "events.csv"
     LOBSTERS = DATA / "lobsters.csv"
-    GEOMAGNETIC_FIELD = DATA / "magnetic-field.csv"
-    CONTROL_EVENTS = DATA / "control-events.csv"
 
 
 class Dim(Enum):
@@ -74,28 +81,25 @@ class Dim(Enum):
     Dimensions used in lobster movement dataset.
     """
 
+    DATE = "date"
+    TRIAL = "trial"
+    LOBSTER_ID = "lobster_id"
+    TRIAL_TYPE = "trial_type"
+    ELAPSED_TIME = "elapsed_time"
+    FIELD = "field"  # switching field on/off
+    ENTANGLED = "entangled"  # whether lobster is entangled during switching
+    START = "start"  # intervals
+    STOP = "stop"  # intervals
+    EVENT = "event"  # lobsters, molt / death
+    HEADING = "heading"  # control
+    POSITION = "position"  # control
+
     X_HEAD = "x_head"  # normalized position of the head
     Y_HEAD = "y_head"
     X_TAIL = "x_tail"  # normalized position of the tail
     Y_TAIL = "y_tail"
-    DURATION = "duration"
-    TRIAL_TYPE = "trial_type"
-    LOBSTER_ID = "lobster_id"
-    COMPASS = "compass"
-    TRIAL = "trial"
-    FIELD = "field"
-    ENTANGLED = "entangled"  # whether lobster is entangled
-    NOTES = "notes"  # additional notes or comments
-    ACCLIMATION = "acclimation"  # minutes in tank before trial
-    ELAPSED_TIME = "elapsed_time"
-    SINCE_EVENT = "since_event"
-    DATA_PERIOD = "data_period"
-    DATE = "date"
-    EVENT = "event"
-    TIME = "time"
-    SECTOR = "sector"
-    HEADING = "heading"  # computed / observed
-    POSITION = "position"  # computed
+    COMPASS = "compass"  # coil state
+    SINCE_EVENT = "since_event"  # time since coil state switch
 
 
 class Derived(Enum):
@@ -106,6 +110,9 @@ class Derived(Enum):
     THETA = "position"
     RADIUS = "radius"
     HEADING = "heading"
+    X = "x"
+    Y = "y"
+    TIME_DIFF = "time_diff"
 
 
 class Palette(Enum):
@@ -118,43 +125,18 @@ class Palette(Enum):
     CONTROL = "black"
 
 
-@group()
-def cli():
-    """
-    Commandline interface for better UX when working with lobster
-    movement dataset.
-    """
-
-
-@group(name=Commands.PLOT.value)
-def cli_plot():
-    """
-    Commands for plotting experiment data.
-    """
-
-
-@group(name=Commands.LOBSTER.value)
-def cli_plot_lobster():
-    """
-    Commands for describing lobster movement data.
-    """
-
-
-@group(name=Commands.DESCRIBE.value)
-def cli_describe():
-    """
-    Commands for describing experiment data.
-    """
-
-
-@group(name=Commands.LOBSTER.value)
-def cli_describe_lobster():
-    """
-    Commands for describing lobster movement data.
-    """
-
-
-
+# Image sizes for each trial number
+image_size = {
+    16: 456,
+    17: 450,
+    18: 450,
+    19: 400,
+    20: 400,
+    21: 400,
+    22: 400,
+    23: 300,
+    24: 400,
+}
 
 
 def clock_string_to_seconds(clock_str: str) -> int:
@@ -163,6 +145,17 @@ def clock_string_to_seconds(clock_str: str) -> int:
     """
     hours, minutes, seconds = map(int, clock_str.split(":"))
     return hours * 3600 + minutes * 60 + seconds
+
+
+computed_struct = Struct(
+    {
+        Derived.THETA.value: Float64,
+        Derived.HEADING.value: Float64,
+        Derived.X.value: Float64,
+        Derived.Y.value: Float64,
+        Derived.RADIUS.value: Float64,
+    }
+)
 
 
 def calc_heading(row: dict) -> dict | None:
@@ -176,9 +169,11 @@ def calc_heading(row: dict) -> dict | None:
     x = (row[Dim.X_HEAD.value] + row[Dim.X_TAIL.value]) / 2
     y = (row[Dim.Y_HEAD.value] + row[Dim.Y_TAIL.value]) / 2
     return {
-        Dim.POSITION.value: atan2(x, y),
-        Dim.HEADING.value: atan2(dx, dy),
-        "radius": (x**2 + y**2) ** 0.5,
+        Derived.THETA.value: atan2(y, x),
+        Derived.HEADING.value: atan2(dy, dx),
+        Derived.X.value: x,
+        Derived.Y.value: y,
+        Derived.RADIUS.value: (x**2 + y**2) ** 0.5,
     }
 
 
@@ -203,13 +198,6 @@ def load_roi_time_series(file_path: Path, res: float) -> DataFrame:
 
     alias = "computed"  # temporary column during unnest
     names = [Dim.X_HEAD.value, Dim.Y_HEAD.value, Dim.X_TAIL.value, Dim.Y_TAIL.value]
-    computed_struct = Struct(
-        {
-            Dim.POSITION.value: Float64,
-            Dim.HEADING.value: Float64,
-            "radius": Float64,
-        }
-    )
     computed = (
         struct(names)
         .map_elements(calc_heading, return_dtype=computed_struct)
@@ -223,7 +211,7 @@ def load_roi_time_series(file_path: Path, res: float) -> DataFrame:
     )
 
 
-def load_trial_time_series(file_path: str) -> DataFrame:
+def load_trial_time_series(file_path: Path) -> DataFrame:
     """
     Load either a single lobster movement trial dataset from a CSV file, or
     use a pattern to load and concatenate many files.
@@ -249,7 +237,7 @@ def load_trial_time_series(file_path: str) -> DataFrame:
         )
         .alias(alias)
     )
-    return pl.read_csv(file_path).with_columns(time, computed).unnest(alias)
+    return read_csv(file_path).with_columns(time, computed).unnest(alias)
 
 
 def load_control_data(file_path: Path, time_column: str = "elapsed_time") -> DataFrame:
@@ -258,13 +246,14 @@ def load_control_data(file_path: Path, time_column: str = "elapsed_time") -> Dat
 
     Convert time to elapsed seconds, and position and heading to radians.
     """
-    return pl.read_csv(file_path).with_columns(
+    return read_csv(file_path).with_columns(
         col(time_column)
         .map_elements(clock_string_to_seconds, return_dtype=Int64)
         .alias(time_column),
-        (col(Dim.SECTOR.value) / 360 * 2 * pi).alias(Dim.POSITION.value),
+        (col(Dim.POSITION.value) / 360 * 2 * pi).alias(Dim.POSITION.value),
         (col(Dim.HEADING.value) / 360 * 2 * pi).alias(Dim.HEADING.value),
     )
+
 
 @cli_describe_lobster.command("trials")
 def cli_describe_lobster_trials():
@@ -274,7 +263,7 @@ def cli_describe_lobster_trials():
     Then subtract that from the trial date to get time since molt.
     """
     lobsters = (
-        pl.read_csv(SourceData.LOBSTERS.value)
+        read_csv(SourceData.LOBSTERS.value)
         .with_columns(
             col(Dim.DATE.value).str.to_datetime().dt.date().alias(Dim.DATE.value)
         )
@@ -282,7 +271,7 @@ def cli_describe_lobster_trials():
     )
     date_right = Dim.DATE.value + "_right"  # temporary column during join
     trials = (
-        pl.read_csv(SourceData.TRIALS.value)
+        read_csv(SourceData.TRIALS.value)
         .with_columns(
             col(Dim.DATE.value).str.to_datetime().dt.date().alias(Dim.DATE.value)
         )
@@ -305,7 +294,7 @@ def load_events_data(file_path: str) -> DataFrame:
     """
     Load the lobster movement events dataset from a CSV file.
     """
-    df = pl.read_csv(file_path)
+    df = read_csv(file_path)
     time = "time"
     field = "field"
     entangled = "entangled"
@@ -327,70 +316,68 @@ def cli_describe_lobster_roi():
     # print(events)
 
 
-res_lookup = {
-    16: 456,
-    17: 450,
-    18: 450,
-    19: 400,
-    20: 400,
-    21: 400,
-    22: 400,
-    23: 300,
-    24: 400,
-}
-
-
-@cli_plot_lobster.command("trajectory")
+# pylint: disable=too-many-locals
+@cli_plot_lobster.command(Cmd.TRAJECTORY.value)
 @argument("trial", type=int)
-def cli_plot_lobster_trajectory(trial: int):
+@option("--bandwidth", default=0.1, help="Bandwidth for kernel density estimate.")
+@option("--colormap", default="cool", help="Colormap for density plot.")
+@option("--image-format", default="png", help="Image format for output file.")
+def cli_plot_lobster_trajectory(
+    trial: int,
+    bandwidth: float,
+    colormap: str,
+    image_format: str,
+):
     """
-    Plot the trajectory of lobster trials.
+    Plot the trajectory of lobster trials. The visualization shows the
+    superposition of the trajectory of a single trial over the output of
+    a kernel density estimate of all positions in that trial.
     """
-
-    df = load_roi_time_series(
-        SourceData.TRIALS_DIR.value / f"{trial:03d}_ROI.zip", res_lookup[trial]
-    )
-    indices = df.select((col("time_diff") > 1).arg_true().alias("indices"))
-    X = vstack([df[Dim.X_HEAD.value], df[Dim.Y_HEAD.value]]).T
-    kde = KernelDensity(bandwidth=0.05, kernel="gaussian").fit(X)
-    xx, yy = meshgrid(np.linspace(-1, 1, 120), np.linspace(-1, 1, 50))
-    xy_grid = vstack([xx.ravel(), yy.ravel()]).T
-
-    # Predict the log density
-    log_dens = kde.score_samples(xy_grid)
-    dens = np.exp(log_dens)
-    dens = dens.reshape(xx.shape)
-    theta_grid = np.arctan2(xx, yy)
-    r_grid = np.sqrt(xx**2 + yy**2)
-
+    path = SourceData.TRIALS_DIR.value / f"{trial:03d}_ROI.zip"
+    df = load_roi_time_series(path, image_size[trial])
     fig, ax = subplots(subplot_kw={"projection": "polar"})
-    c = ax.pcolormesh(theta_grid, r_grid, dens, cmap="cool", shading="gouraud")
-    fig.colorbar(c, ax=ax, label="Density")
 
-    for current, next_item in pairwise([0, *indices["indices"], len(df) + 1]):
-        subset = df.slice(offset=current, length=next_item - current)
-        x = subset[Dim.POSITION.value]
-        y = subset["radius"]
+    # Project the predicted density to a polar grid.
+    training = df.select([Derived.X.value, Derived.Y.value]).to_numpy()
+    kde = KernelDensity(bandwidth=bandwidth, kernel="gaussian").fit(training)
+    xx, yy = meshgrid(np.linspace(-1, 1, 120), np.linspace(-1, 1, 50))
+    grid = vstack([xx.ravel(), yy.ravel()]).T
+    kernel_density = [
+        np.atan2(yy, xx),
+        np.sqrt(xx**2 + yy**2),
+        np.exp(kde.score_samples(grid)).reshape(xx.shape),
+    ]
+    gradient = ax.pcolormesh(*kernel_density, cmap=colormap, shading="gouraud")
+    fig.colorbar(gradient, ax=ax, label="Density")
+
+    # Break position data on gaps in the time series, and plot each segment
+    # over the density gradient.
+    mask = (col(Derived.TIME_DIFF.value) > 1).arg_true()
+    breakpoints = df.select(mask).get_column(Derived.TIME_DIFF.value)
+    edges = [0, *breakpoints, len(df) + 1]
+    select = (Derived.THETA.value, Derived.RADIUS.value)
+    for start, end in pairwise(edges):
         ax.plot(
-            x,
-            y,
+            *df.slice(offset=start, length=end - start).select(select),
             color="black",
-            alpha=0.6,
-            linestyle="-",
-            linewidth=0.5,
+            alpha=0.5,
+            linestyle=":",
+            linewidth=1,
         )
 
+    # Style and save the figure.
     ax.grid(False)
-    ax.set_title(f"Trajectory for trial {trial}")
+    ax.set_title(f"Position (Trial {trial})")
     ax.set_yticklabels([])
     ax.set_ylim(0, 1)
     fig.legend(loc="lower right", frameon=False)
     fig.tight_layout()
-    fig.savefig(FIGURES / f"lobster_trajectory_{trial}.png")
+    filename = [Cmd.LOBSTER.value, Cmd.TRAJECTORY.value, f"{trial}.{image_format}"]
+    fig.savefig(FIGURES / "-".join(filename))
     print("OK")
 
 
-@cli_plot_lobster.command(Commands.HISTOGRAM.value)
+@cli_plot_lobster.command(Cmd.HISTOGRAM.value)
 @argument("parameter", type=Choice(PlotLobsterOptions, case_sensitive=False))
 @option("--bins", default=12, help="Number of bins.")
 def cli_plot_lobster_histogram(parameter: PlotLobsterOptions, bins: int):
@@ -399,50 +386,96 @@ def cli_plot_lobster_histogram(parameter: PlotLobsterOptions, bins: int):
     This doesn't use derivatives, so we load and concatenate all the flat files.
     The records are then partitioned by whether the coil was on or off.
     """
-    control = load_control_data(SourceData.CONTROL.value)
-    series = control[parameter.value]
-    area, edges = histogram(series, bins=bins, range=(0, 2 * pi), density=True)
-    area = append(area, area[0])  # close the circle
-    control_label = "Control (N=" + str(series.count()) + ")"
-    trials_csv = load_trial_time_series(str(SourceData.TRIALS_DIR.value) + "/*.csv")
-    trials = DataFrame()
-    for trial_num in range(16, 25):
-        trial_data = load_roi_time_series(
-            SourceData.TRIALS_DIR.value / f"{trial_num:03d}_ROI.zip",
-            res_lookup[trial_num],
-        )
-        trials = pl.concat([trials, trial_data])
     fig, ax = subplots(subplot_kw={"projection": "polar"})
-    ax.plot(edges, area, color=Palette.CONTROL.value, label=control_label)
-    state = col(Dim.COMPASS.value)
-    for mask, color, label in [
-        (state <= 0, Palette.OFF.value, "Off"),
-        (state > 0, Palette.ON.value, "On"),
-    ]:
-        series = trials_csv.filter(mask)[parameter.value]
-        area, edges = histogram(series, bins=bins, range=(-pi, pi), density=True)
-        area = append(area, area[0])
-        ax.plot(
-            edges,
-            area,
-            color=color,
-            label=f"{label} (N={series.count()})",
+
+    def polar_hist(
+        series: Series,
+        label: str,
+        bounds: tuple[float, float] = (-pi, pi),
+        color: Palette = Palette.CONTROL,
+        linestyle: str = "-",
+    ):
+        """Convenience function to plot polar histogram"""
+        hist = histogram(series, bins=bins, range=bounds, density=True)
+        count = series.is_not_nan().sum()
+        ax.fill(
+            *zip(*zip(*reversed(hist))),
+            color=color.value,
+            linestyle=linestyle,
+            label=f"{label.capitalize()} (N={count})",
+            fill=False,
         )
-    area, edges = histogram(
-        trials[parameter.value], bins=bins, range=(-pi, pi), density=True
+
+    # Load and combine all trial data from ROI files, then plot
+    # the overall distribution.
+    def trial(index: int):
+        """Convenience function to load a single ROI file."""
+        path = SourceData.TRIALS_DIR.value / f"{index:03d}_ROI.zip"
+        df = load_roi_time_series(path, image_size[index])
+        return df[parameter.value]
+
+    polar_hist(
+        pl.concat(map(trial, range(16, 25))),
+        linestyle="--",
+        label="all",
     )
-    area = append(area, area[0])
-    ax.plot(edges, area, color="black", linestyle="--", label="All trials")
+
+    # Load data from control trials and plot the distribution as a
+    # polygon on the polar plot. The zipping and unpacking is to
+    # close the polygon and get coordinates in the right order.
+    polar_hist(
+        load_control_data(SourceData.CONTROL.value).get_column(parameter.value),
+        bounds=(0, 2 * pi),
+        label="control",
+    )
+
+    # Load and combine experiment data from ROI files, then partition the
+    # observations by coil state to plot their distributions.
+    trials_csv = load_trial_time_series(SourceData.TRIALS_DIR.value / "*.csv")
+    state = col(Dim.COMPASS.value)
+    polar_hist(
+        trials_csv.filter(state <= 0).get_column(parameter.value),
+        color=Palette.OFF,
+        label="off",
+    )
+    polar_hist(
+        trials_csv.filter(state > 0).get_column(parameter.value),
+        color=Palette.ON,
+        label="on",
+    )
+
+    # Style and save the figure.
     ax.grid(False)
     ax.set_title(f"Lobster {parameter.value} distribution by coil state")
     ax.set_yticklabels([])
-    fig.legend(loc="lower right", frameon=False)
+    fig.legend(loc="lower left", frameon=False)
     fig.tight_layout()
-    fig.savefig(FIGURES / f"{Commands.LOBSTER.value}-histogram-{parameter.value}.png")
+    filename = [Cmd.LOBSTER.value, Cmd.HISTOGRAM.value, parameter.value + ".png"]
+    fig.savefig(FIGURES / "-".join(filename))
     print("OK")
 
 
 if __name__ == "__main__":
+
+    @group()
+    def cli():
+        """
+        Commandline interface for better UX when working with lobster
+        movement dataset.
+        """
+
+    @group(name=Cmd.PLOT.value)
+    def cli_plot():
+        """
+        Cmd for plotting experiment data.
+        """
+
+    @group(name=Cmd.DESCRIBE.value)
+    def cli_describe():
+        """
+        Cmd for describing experiment data.
+        """
+
     cli.add_command(cli_describe)
     cli.add_command(cli_plot)
     cli_describe.add_command(cli_describe_lobster)

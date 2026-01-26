@@ -1,4 +1,4 @@
-elapsed_time,trial,sector,heading
+elapsed_time,trial,position,heading
 00:01:00,1,210,180
 00:02:00,1,0,90
 00:03:00,1,120,210

@@ -1,11 +1,19 @@
 {
     "cSpell.words": [
+        "arctan",
+        "cmap",
+        "colorbar",
         "Firester",
         "Firester's",
+        "frameon",
+        "gouraud",
         "Imagej",
+        "linestyle",
         "Lohmann",
+        "pcolormesh",
         "roifile",
         "roiread",
+        "ylim",
         "yticklabels"
     ]
 }
