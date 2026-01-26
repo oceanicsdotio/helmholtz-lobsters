@@ -8,6 +8,7 @@
         "frameon",
         "gouraud",
         "Imagej",
+        "linalg",
         "linestyle",
         "Lohmann",
         "pcolormesh",

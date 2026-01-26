@@ -4,6 +4,7 @@ movement trials dataset.
 
 - `plot lobster histogram <PARAMETER>`: OK
 - `plot lobster trajectory <TRIAL>`: OK
+
 - `describe lobster trials`: WIP
 - `describe lobster roi`: WIP
 
@@ -13,8 +14,8 @@ from enum import Enum
 from pathlib import Path
 from itertools import pairwise
 from zipfile import ZipFile
-from numpy import atan2, pi, histogram, vstack, meshgrid
-import numpy as np
+from numpy import atan2, pi, histogram, meshgrid, linspace, exp, array
+from numpy.linalg import norm
 from matplotlib.pyplot import subplots
 from click import option, group, argument, Choice
 from polars import col, Struct, Float64, struct, Int64, DataFrame, read_csv, Series
@@ -178,6 +179,9 @@ def calc_heading(row: dict) -> dict | None:
 
 
 def parse_row(item: tuple[str, ImagejRoi], res: float) -> list[float]:
+    """
+    Parse ImageJ ROI data into a flat list of frame and normalized coordinates.
+    """
     file, roi = item
     frame = int(file.split("-")[0])
     coords = roi.coordinates().flatten()  # type: ignore
@@ -320,7 +324,7 @@ def cli_describe_lobster_roi():
 @cli_plot_lobster.command(Cmd.TRAJECTORY.value)
 @argument("trial", type=int)
 @option("--bandwidth", default=0.1, help="Bandwidth for kernel density estimate.")
-@option("--colormap", default="cool", help="Colormap for density plot.")
+@option("--colormap", default="Blues_r", help="Colormap for density plot.")
 @option("--image-format", default="png", help="Image format for output file.")
 def cli_plot_lobster_trajectory(
     trial: int,
@@ -338,16 +342,22 @@ def cli_plot_lobster_trajectory(
     fig, ax = subplots(subplot_kw={"projection": "polar"})
 
     # Project the predicted density to a polar grid.
-    training = df.select([Derived.X.value, Derived.Y.value]).to_numpy()
-    kde = KernelDensity(bandwidth=bandwidth, kernel="gaussian").fit(training)
-    xx, yy = meshgrid(np.linspace(-1, 1, 120), np.linspace(-1, 1, 50))
-    grid = vstack([xx.ravel(), yy.ravel()]).T
-    kernel_density = [
-        np.atan2(yy, xx),
-        np.sqrt(xx**2 + yy**2),
-        np.exp(kde.score_samples(grid)).reshape(xx.shape),
-    ]
-    gradient = ax.pcolormesh(*kernel_density, cmap=colormap, shading="gouraud")
+    i, j = (50, 120)
+    train = df.select([Derived.X.value, Derived.Y.value])
+    grid = meshgrid(linspace(-1, 1, i), linspace(-1, 1, j))
+    predict = (
+        KernelDensity(bandwidth=bandwidth, kernel="gaussian")
+        .fit(train.to_numpy())
+        .score_samples(array(grid).reshape(2, i * j).T)
+        .reshape((j, i))
+    )
+    gradient = ax.pcolormesh(
+        atan2(*reversed(grid)),
+        norm(array(grid), axis=0),
+        exp(predict),
+        cmap=colormap,
+        shading="gouraud"
+    )
     fig.colorbar(gradient, ax=ax, label="Density")
 
     # Break position data on gaps in the time series, and plot each segment
@@ -359,18 +369,49 @@ def cli_plot_lobster_trajectory(
     for start, end in pairwise(edges):
         ax.plot(
             *df.slice(offset=start, length=end - start).select(select),
-            color="black",
+            color=Palette.CONTROL.value,
             alpha=0.5,
             linestyle=":",
             linewidth=1,
         )
+
+    # Extract coil toggle events from CSV (for now), and plot the
+    # location of the animal at these times. Future case needs to
+    # take the event timestamps for each trial and join with the
+    # ROI trajectories to get positions from raw sources.
+    # OK for now to drop rows with missing data...
+    trials = load_trial_time_series(SourceData.TRIALS_DIR.value / f"{trial}.csv").with_columns(
+        (col(Dim.COMPASS.value).diff()).alias("compass_diff")
+    )
+    dims = [Derived.THETA.value, Derived.RADIUS.value]
+    filter_on = col("compass_diff")
+    on_events = trials.filter(filter_on > 1).select(dims)
+    ax.scatter(
+        *on_events,
+        edgecolors=Palette.CONTROL.value,
+        facecolors="white",
+        label=f"Coil On (N={on_events.height})",
+        marker=".",
+        s=100,
+        zorder=3,
+    )
+    off_events = trials.filter(filter_on < -1).select(dims)
+    ax.scatter(
+        *off_events,
+        edgecolors=Palette.CONTROL.value,
+        facecolors=Palette.CONTROL.value,
+        label=f"Coil Off (N={off_events.height})",
+        marker=".",
+        s=100,
+        zorder=3,
+    )
 
     # Style and save the figure.
     ax.grid(False)
     ax.set_title(f"Position (Trial {trial})")
     ax.set_yticklabels([])
     ax.set_ylim(0, 1)
-    fig.legend(loc="lower right", frameon=False)
+    fig.legend(loc="lower left", frameon=False)
     fig.tight_layout()
     filename = [Cmd.LOBSTER.value, Cmd.TRAJECTORY.value, f"{trial}.{image_format}"]
     fig.savefig(FIGURES / "-".join(filename))
